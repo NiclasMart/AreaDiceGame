@@ -30,6 +30,12 @@
     <ClInclude Include="Resource.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="spritelib.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="XUnzip.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Beleg.cpp">
@@ -39,6 +45,12 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="spritelib.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="XUnzip.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

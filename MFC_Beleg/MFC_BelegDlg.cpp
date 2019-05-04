@@ -45,6 +45,37 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Kleines Symbol verwenden
 
 	// TODO: Hier zusätzliche Initialisierung einfügen
+	if (!m_bkg.Load("Hintergrund.bmp")) {
+		AfxMessageBox(L"Konnte Hintergrund.bmp nicht laden!");
+		OnCancel();
+	}
+	m_bkg.SetZ(0);
+	m_buff.Load("Hintergrund.bmp");
+
+
+	if (!m_field[0][0].Load("94x84_Sprite_4.bmp", CSize(94, 84))) {
+		AfxMessageBox(L"Konnte 94x84_Sprite_4.bmp nicht laden!");
+		OnCancel();
+	}
+
+	int z = 1;
+	for (int i = 0; i < 12; i++) {
+		for (int j = 0; j < 12; j++) {
+			m_field[i][j] = m_field[0][0];
+			m_field[i][j].SetZ(z);
+			m_field[i][j].SetPosition(908 + (79 * i), 67 + (79 * j));
+			m_list.Insert(&m_field[i][j]);
+			z++;
+
+		}
+	}
+
+
+
+
+	m_list.SetWorkspace(&m_buff);
+	m_list.Insert(&m_bkg);
+	/*m_list.Insert(&m_field[0][0]);*/
 
 	return TRUE;  // TRUE zurückgeben, wenn der Fokus nicht auf ein Steuerelement gesetzt wird
 }
@@ -55,10 +86,10 @@ BOOL CMFCBelegDlg::OnInitDialog()
 
 void CMFCBelegDlg::OnPaint()
 {
+	CPaintDC dc(this); // Gerätekontext zum Zeichnen
+
 	if (IsIconic())
 	{
-		CPaintDC dc(this); // Gerätekontext zum Zeichnen
-
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
 
 		// Symbol in Clientrechteck zentrieren
@@ -74,6 +105,7 @@ void CMFCBelegDlg::OnPaint()
 	}
 	else
 	{
+		m_list.RedrawAll(&dc, 0, 0);
 		CDialogEx::OnPaint();
 	}
 }
