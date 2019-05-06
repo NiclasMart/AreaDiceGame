@@ -4,6 +4,7 @@
 
 #pragma once
 #include "spritelib.h";
+#include "CSpriteMatrix.h"
 
 
 // CMFCBelegDlg-Dialogfeld
@@ -21,7 +22,8 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
 	CDIB m_buff;
-	CSprite m_start, m_bkg, m_button, m_field[12][12];
+	CSprite m_start, m_bkg, m_button, m_dice;
+	CSpriteMatrix m_field[12][12];
 	CSpriteList m_list;
 
 

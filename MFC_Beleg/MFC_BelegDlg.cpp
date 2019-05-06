@@ -6,6 +6,7 @@
 #include "MFC_Beleg.h"
 #include "MFC_BelegDlg.h"
 #include "afxdialogex.h"
+#include <time.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -47,7 +48,7 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Kleines Symbol verwenden
 
 	// TODO: Hier zusätzliche Initialisierung einfügen
-	
+	srand((unsigned)time(NULL));
 
 	//Spielhintergrund BMP laden
 	if (!m_bkg.Load("Hintergrund.bmp")) {
@@ -62,11 +63,22 @@ BOOL CMFCBelegDlg::OnInitDialog()
 		OnCancel();
 	}
 
+	//Würfel hinzufügen
+	if (!m_dice.Load("241x233_Wuerfel_3x2.bmp", CSize(241, 233))) {
+		AfxMessageBox(L"Konnte 241x233_Wuerfel_3x2.bmp nicht laden!");
+		OnCancel();
+	}
+
+	m_dice.SetZ(150);
+	m_dice.SetSpriteNumber(0, 1);
+	m_dice.SetPosition(375, 825);
+
 	//Initialisieren aller Feldinhalte der Matrix
 	int z = 1;
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
 			m_field[i][j] = m_field[0][0];
+			m_field[i][j].SetMatrixPos(i, j);
 			m_field[i][j].SetZ(z);
 			m_field[i][j].SetPosition(908 + (79 * i), 67 + (79 * j));
 			m_field[i][j].SetAlpha(0.0f);
@@ -161,13 +173,21 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		m_start.SetPosition(1920, 0);
 		m_buff.Load("Hintergrund.bmp");
 		m_list.Insert(&m_bkg);
+		m_list.Insert(&m_dice);
 		for (int i = 0; i < 12; i++) {
-			for (int j = 0; j < 12; j++){
+			for (int j = 0; j < 12; j++) {
 				m_list.Insert(&m_field[i][j]);
 			}
 		}
 	}
+
+	//Wenn Würfel getroffen, random ändern der Augenzahl
 	//falls Mausklick innerhalb des Spiels: wenn ein Feld angeklickt wird, wird die Transparents des Sprits auf diesem Feld auf 100% gesetzt
+	
+	if (hit == &m_dice) {
+		m_dice.SetSpriteNumber(rand() % 3, rand() % 2);
+		
+	}
 	else {
 		if (hit != NULL) {
 			hit->SetAlpha(1.0f);
@@ -195,3 +215,4 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 
 	CDialogEx::OnMouseMove(nFlags, point);
 }
+
