@@ -4,6 +4,7 @@
 
 #pragma once
 #include "spritelib.h";
+#include "CSpriteMatrix.h"
 
 
 // CMFCBelegDlg-Dialogfeld
@@ -21,8 +22,12 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
 	CDIB m_buff;
-	CSprite m_start, m_bkg, m_button, m_field[12][12];
+	CSprite m_start, m_bkg, m_button, m_dice[2];
+	CSpriteMatrix m_field[12][12];
 	CSpriteList m_list;
+	bool Dicestate;			//gibt an, ob gerade gewürfelt wird oder nicht
+	void InitDice();
+	void InitGame();
 
 
 // Implementierung
@@ -37,4 +42,5 @@ protected:
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };
