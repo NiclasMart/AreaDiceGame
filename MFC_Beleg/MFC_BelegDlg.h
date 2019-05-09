@@ -7,7 +7,6 @@
 #include "CSpriteMatrix.h"
 
 
-
 // CMFCBelegDlg-Dialogfeld
 class CMFCBelegDlg : public CDialogEx
 {
