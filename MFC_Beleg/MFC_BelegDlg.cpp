@@ -21,6 +21,8 @@ CMFCBelegDlg::CMFCBelegDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_MFC_BELEG_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+
+	
 }
 
 void CMFCBelegDlg::DoDataExchange(CDataExchange* pDX)
@@ -51,6 +53,9 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	// TODO: Hier zusätzliche Initialisierung einfügen
 	srand((unsigned)time(NULL));
 
+	m_state = 0;
+	
+
 	//Spielhintergrund BMP laden
 	if (!m_bkg.Load("Hintergrund.bmp")) {
 		AfxMessageBox(L"Konnte Hintergrund.bmp nicht laden!");
@@ -64,7 +69,7 @@ BOOL CMFCBelegDlg::OnInitDialog()
 		OnCancel();
 	}
 
-	//Würfel hinzufügen
+	//Würfel Sprite BMP laden
 	if (!m_dice[0].Load("241x233_Wuerfel_3x2.bmp", CSize(241, 233))) {
 		AfxMessageBox(L"Konnte 241x233_Wuerfel_3x2.bmp nicht laden!");
 		OnCancel();
@@ -72,52 +77,68 @@ BOOL CMFCBelegDlg::OnInitDialog()
 
 	m_dice[1] = m_dice[0];
 	for (int i = 0; i < 2; i++){
-		m_dice[i].SetZ(150);
+		m_dice[i].SetZ(10);
 		m_dice[i].SetSpriteNumber(rand() % 3, rand() % 2);
-		m_dice[i].SetPosition(175 + i*200, 825);
+		m_dice[i].SetPosition(260 + i*200, 850);
 	}
 	
 
 	//Initialisieren aller Feldinhalte der Matrix
-	int z = 1;
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
 			m_field[i][j] = m_field[0][0];
 			m_field[i][j].SetMatrixPos(i, j);
-			m_field[i][j].SetZ(z);
+			m_field[i][j].SetZ(1);
 			m_field[i][j].SetPosition(908 + (79 * i), 67 + (79 * j));
 			m_field[i][j].SetAlpha(0.0f);
-			z++;
-
 		}
 	}
 
 	//Startbildschirm BMP laden + Buffer Initialisieren
-	if (!m_start.Load("Startbildschirm.bmp")) {
+	if (!m_startbkg.Load("Startbildschirm.bmp")) {
 		AfxMessageBox(L"Konnte Startbildschirm.bmp nicht laden!");
 		OnCancel();
 	}
-	m_start.SetZ(200);
-	m_start.SetPosition(0, 0);
+	m_startbkg.SetZ(50);
+	m_startbkg.SetPosition(0, 0);
 	m_buff.Load("Startbildschirm.bmp");
 
 	
 	//Start Button BMP laden
-	if (!m_button.Load("400x250_Start_button_2.bmp", CSize(400, 250))) {
+	if (!m_startbutton.Load("400x250_Start_button_2.bmp", CSize(400, 250))) {
 		AfxMessageBox(L"Konnte 400x250_Start_button_2.bmp nicht laden!");
 		OnCancel();
 	}
-	m_button.SetZ(201);
-	m_button.SetPosition(760, 700);
+	m_startbutton.SetZ(51);
+	m_startbutton.SetPosition(760, 700);
 
+	//restliche Button laden
+	if (!m_menubutton[0].Load("175x60_buttons_0x12.bmp", CSize(175, 60))) {
+		AfxMessageBox(L"Konnte 175x60_buttons_0x12.bmp nicht laden!");
+		OnCancel();
+	}
+	m_menubutton[0].SetZ(30);
+	m_menubutton[0].SetPosition(100, 50);
+	for (int i = 1; i < 4; i++) {
+		m_menubutton[i] = m_menubutton[0];
+		m_menubutton[i].SetSpriteNumber(0, i * 2);
+		m_menubutton[i].SetPosition(275 + (i - 1)*175, 50);
+		m_menubutton[i].SetZ(30);
+	}
 
+	//Würfelbutton initialisieren
+	m_dicebutton = m_menubutton[0];
+	m_dicebutton.SetZ(30);
+	m_dicebutton.SetPosition(368, 750);
+	m_dicebutton.SetSpriteNumber(0, 8);
 
 
 	//alle Elemente des Startbildschirms zur Liste hinzufügen
 	m_list.SetWorkspace(&m_buff);
-	m_list.Insert(&m_start);
-	m_list.Insert(&m_button);
+	m_list.Insert(&m_startbkg);
+	m_list.Insert(&m_startbutton);
 	Dicestate = FALSE;
+	
 
 	return TRUE;  // TRUE zurückgeben, wenn der Fokus nicht auf ein Steuerelement gesetzt wird
 }
@@ -173,14 +194,17 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		-Startbildschirm und Button verschwinden
 		-Puffer wird mit neuem Hintergrund initialisiert 
 		-alle Feldsprites werden in die Liste geladen*/
-	if (hit == &m_button) {
-		InitGame();
+	if (hit == &m_startbutton) {
+		statemachine(0);
 	}
 
-	//Wenn Würfel getroffen, random ändern der Augenzahl
-	//falls Mausklick innerhalb des Spiels: wenn ein Feld angeklickt wird, wird die Transparents des Sprits auf diesem Feld auf 100% gesetzt
-	if (hit == &m_dice[0] || hit == &m_dice[1]) {
-		InitDice();
+	//Für Würfelbutton
+	if (hit == &m_dicebutton) {
+		statemachine(4);
+	}
+
+	if (hit == &m_menubutton[3]) {
+		statemachine(1);
 	}
 	else {
 		if (hit != NULL) {
@@ -199,10 +223,24 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 	CClientDC dc(this);
 	CSprite *hit = m_list.HitTest(point);
 
-	if (hit == &m_button)
-		m_button.SetSpriteNumber(0, 1);
+	//Butoon im Startmenü
+	if (hit == &m_startbutton)
+		m_startbutton.SetSpriteNumber(0, 1);
 	else
-		m_button.SetSpriteNumber(0, 0);
+		m_startbutton.SetSpriteNumber(0, 0);
+
+	//Würfelbutton
+	if (hit == &m_dicebutton)
+		m_dicebutton.SetSpriteNumber(0, 9);
+	else
+		m_dicebutton.SetSpriteNumber(0, 8);
+
+	for (int i = 0; i < 4; i++) {
+		if (hit == &m_menubutton[i])
+			m_menubutton[i].SetSpriteNumber(0, 1 + i * 2);
+		else
+			m_menubutton[i].SetSpriteNumber(0, i * 2);
+	}
 
 
 	m_list.Update(&dc, 0, 0);
@@ -213,12 +251,18 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 
 //Wird beim Klick auf den Start button im Startmenu aufgerufen; initialisiert das Spielfeld
 void CMFCBelegDlg::InitGame(){
-	m_button.SetPosition(1921, 0);
-	m_start.SetPosition(1920, 0);
+	m_startbutton.SetPosition(1921, 0);
+	m_startbkg.SetPosition(1920, 0);
+
 	m_buff.Load("Hintergrund.bmp");
 	m_list.Insert(&m_bkg);
+
+	m_list.Insert(&m_dicebutton);
 	m_list.Insert(&m_dice[0]);
 	m_list.Insert(&m_dice[1]);
+	for (int i = 0; i < 4; i++) {
+		m_list.Insert(&m_menubutton[i]);
+	}
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
 			m_list.Insert(&m_field[i][j]);
@@ -229,6 +273,10 @@ void CMFCBelegDlg::InitGame(){
 
 //wird beim Klick auf einen Würfel aufgerufen, Switcht zwischen Status würfeln und nicht würfeln
 void CMFCBelegDlg::InitDice(){
+
+
+	SetTimer(2, 2000, NULL);
+	SetTimer(1, 75, NULL);
 
 	if (Dicestate == FALSE){
 		SetTimer(1, 75, NULL);
@@ -247,9 +295,44 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 	// TODO: Fügen Sie hier Ihren Meldungsbehandlungscode ein, und/oder benutzen Sie den Standard.
 	CClientDC dc(this);
 
-	m_dice[0].SetSpriteNumber(rand() % 3, rand() % 2);
-	m_dice[1].SetSpriteNumber(rand() % 3, rand() % 2);
-	m_list.Update(&dc, 0, 0);
+	if (nIDEvent == 2) {
+		KillTimer(1);
+		KillTimer(2);
+	}
+	else {
+		if (nIDEvent == 1) {
+			m_dice[0].SetSpriteNumber(rand() % 3, rand() % 2);
+			m_dice[1].SetSpriteNumber(rand() % 3, rand() % 2);
+			m_list.Update(&dc, 0, 0);
+		}
+	}
+	
 
 	CDialogEx::OnTimer(nIDEvent);
+}
+
+void CMFCBelegDlg::statemachine(int event) {
+
+	switch (m_table[event][m_state].action) {
+	case -1: return;
+		break;
+	case 0: 
+		break;
+	case 1: InitGame();
+		break;
+	case 2: OnCancel();
+		break;
+	case 3: //game(TRUE)
+		break;
+	case 4: InitDice();
+		break;
+	case 5: KillTimer(1);
+		break;
+	case 6: //reset_game()
+		break;
+	case 7: //game(FALSE)
+		break;
+	case 8: //show fields()
+	}
+	m_state = m_table[event][m_state].next_state;
 }

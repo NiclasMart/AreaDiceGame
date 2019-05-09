@@ -7,6 +7,7 @@
 #include "CSpriteMatrix.h"
 
 
+
 // CMFCBelegDlg-Dialogfeld
 class CMFCBelegDlg : public CDialogEx
 {
@@ -22,12 +23,28 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
 	CDIB m_buff;
-	CSprite m_start, m_bkg, m_button, m_dice[2];
+	CSprite m_startbkg, m_bkg, m_startbutton, m_menubutton[4], m_dicebutton, m_dice[2];
 	CSpriteMatrix m_field[12][12];
 	CSpriteList m_list;
 	bool Dicestate;			//gibt an, ob gerade gewürfelt wird oder nicht
 	void InitDice();
 	void InitGame();
+	void statemachine(int event);
+
+	int m_state;
+	struct {
+		int next_state;
+		int action;
+	}m_table[8][4] = {
+	   {{1, 1}, {-1, -1}, {-1, -1}, {-1, -1}},
+	   {{-1, -1}, {1, 2}, {2, 2}, {4, 2}},
+	   {{-1, -1}, {-1, -1}, {1, 6}, {1, 6}},
+	   {{-1, -1}, {2, 3}, {-1, -1}, {-1, -1}},
+	   {{-1, -1}, {-1, -1}, {4, 4}, {-1, -1}},
+	   {{-1, -1}, {-1, -1}, {-1, -1}, {2, 5}},
+	   {{-1, -1}, {-1, -1}, {2, 7}, {-1, -1}},
+	   {{-1, -1}, {-1, -1}, {2, 8}, {-1, -1}}
+	};
 
 
 // Implementierung

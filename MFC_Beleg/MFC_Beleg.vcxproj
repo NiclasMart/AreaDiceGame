@@ -181,6 +181,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CSpriteMatrix.h" />
+    <ClInclude Include="CZustand.h" />
     <ClInclude Include="MFC_Beleg.h" />
     <ClInclude Include="MFC_BelegDlg.h" />
     <ClInclude Include="Resource.h" />
@@ -191,6 +192,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CSpriteMatrix.cpp" />
+    <ClCompile Include="CZustand.cpp" />
     <ClCompile Include="MFC_Beleg.cpp" />
     <ClCompile Include="MFC_BelegDlg.cpp" />
     <ClCompile Include="spritelib.cpp" />
