@@ -39,9 +39,6 @@
     <ClInclude Include="CSpriteMatrix.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="CZustand.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Beleg.cpp">
@@ -60,9 +57,6 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="CSpriteMatrix.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="CZustand.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

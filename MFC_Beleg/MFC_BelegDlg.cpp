@@ -132,12 +132,17 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	m_dicebutton.SetPosition(368, 750);
 	m_dicebutton.SetSpriteNumber(0, 8);
 
+	//initialisiere Next Button
+	m_nextbutton = m_menubutton[0];
+	m_nextbutton.SetZ(30);
+	m_nextbutton.SetPosition(1300, 1);
+	m_nextbutton.SetSpriteNumber(0, 10);
+
 
 	//alle Elemente des Startbildschirms zur Liste hinzufügen
 	m_list.SetWorkspace(&m_buff);
 	m_list.Insert(&m_startbkg);
 	m_list.Insert(&m_startbutton);
-	Dicestate = FALSE;
 	
 
 	return TRUE;  // TRUE zurückgeben, wenn der Fokus nicht auf ein Steuerelement gesetzt wird
@@ -195,20 +200,28 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		-Puffer wird mit neuem Hintergrund initialisiert 
 		-alle Feldsprites werden in die Liste geladen*/
 	if (hit == &m_startbutton) {
-		statemachine(0);
+		statemachine(0, NULL);
 	}
 
 	//Für Würfelbutton
 	if (hit == &m_dicebutton) {
-		statemachine(4);
+		statemachine(4, NULL);
 	}
 
+	//Ende Button
 	if (hit == &m_menubutton[3]) {
-		statemachine(1);
+		statemachine(1, NULL);
+	}
+
+	if (hit == &m_nextbutton) {
+		statemachine(6, NULL);
+	}
+	if (hit == &m_menubutton[0]) {
+		statemachine(3, NULL);
 	}
 	else {
 		if (hit != NULL) {
-			hit->SetAlpha(1.0f);
+			statemachine(7, point);
 		}
 	}
 	m_list.Update(&dc, 0, 0);
@@ -235,6 +248,13 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 	else
 		m_dicebutton.SetSpriteNumber(0, 8);
 
+	//Nextbutton
+	if (hit == &m_nextbutton)
+		m_nextbutton.SetSpriteNumber(0, 11);
+	else
+		m_nextbutton.SetSpriteNumber(0, 10);
+
+	//Menue Buttons
 	for (int i = 0; i < 4; i++) {
 		if (hit == &m_menubutton[i])
 			m_menubutton[i].SetSpriteNumber(0, 1 + i * 2);
@@ -260,6 +280,7 @@ void CMFCBelegDlg::InitGame(){
 	m_list.Insert(&m_dicebutton);
 	m_list.Insert(&m_dice[0]);
 	m_list.Insert(&m_dice[1]);
+	m_list.Insert(&m_nextbutton);
 	for (int i = 0; i < 4; i++) {
 		m_list.Insert(&m_menubutton[i]);
 	}
@@ -274,18 +295,10 @@ void CMFCBelegDlg::InitGame(){
 //wird beim Klick auf einen Würfel aufgerufen, Switcht zwischen Status würfeln und nicht würfeln
 void CMFCBelegDlg::InitDice(){
 
-
-	SetTimer(2, 2000, NULL);
 	SetTimer(1, 75, NULL);
+	SetTimer(2, 2000, NULL);
+	
 
-	if (Dicestate == FALSE){
-		SetTimer(1, 75, NULL);
-		Dicestate = TRUE;
-	}
-	else {
-		KillTimer(1);
-		Dicestate = FALSE;
-	}
 }
 
 
@@ -298,6 +311,7 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 	if (nIDEvent == 2) {
 		KillTimer(1);
 		KillTimer(2);
+		statemachine(5, NULL);
 	}
 	else {
 		if (nIDEvent == 1) {
@@ -311,7 +325,21 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 	CDialogEx::OnTimer(nIDEvent);
 }
 
-void CMFCBelegDlg::statemachine(int event) {
+void CMFCBelegDlg::game(bool player) {
+
+	return;
+}
+
+void CMFCBelegDlg::set_field(CPoint point) {
+
+	CSprite *hit = m_list.HitTest(point);
+
+	hit->SetAlpha(1.0f);
+
+}
+
+
+void CMFCBelegDlg::statemachine(int event, CPoint point) {
 
 	switch (m_table[event][m_state].action) {
 	case -1: return;
@@ -332,7 +360,8 @@ void CMFCBelegDlg::statemachine(int event) {
 		break;
 	case 7: //game(FALSE)
 		break;
-	case 8: //show fields()
+	case 8: set_field(point);
+		break;
 	}
 	m_state = m_table[event][m_state].next_state;
 }
