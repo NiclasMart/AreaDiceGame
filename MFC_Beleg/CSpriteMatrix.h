@@ -6,11 +6,11 @@ public:
 	
 	CSpriteMatrix();
 	~CSpriteMatrix();
-	void SetMatrixPos(int x, int y);
 	
 
+
 private:
-	int matrix_posx, matrix_posy;
+
 	
 };
 

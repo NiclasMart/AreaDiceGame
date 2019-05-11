@@ -53,9 +53,10 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	// TODO: Hier zusätzliche Initialisierung einfügen
 	srand((unsigned)time(NULL));
 
+	//Anfangszustand setzen (Zustand: Spielstart)
 	m_state = 0;
 	
-
+	
 	//Spielhintergrund BMP laden
 	if (!m_bkg.Load("Hintergrund.bmp")) {
 		AfxMessageBox(L"Konnte Hintergrund.bmp nicht laden!");
@@ -63,8 +64,19 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	}
 	m_bkg.SetZ(0);
 	
+	//Schrift laden
+	if (!m_font.Load("325x50_Schrift_4.bmp", CSize(325, 50))) {
+		AfxMessageBox(L"Konnte 325x50_Schrift_4.bmp nicht laden!");
+		OnCancel();
+	}
+	m_font.SetZ(40);
+	m_font.SetPosition(1921, 0);
+	m_list.Insert(&m_font);
+	
+
+
 	//Feld Sprite BMP laden
-	if (!m_field[0][0].Load("94x84_Sprite_4.bmp", CSize(94, 84))) {
+	if (!m_field[0][0].Load("94x84_Sprite_4.bmp", CSize(94, 85))) {
 		AfxMessageBox(L"Konnte 94x84_Sprite_4.bmp nicht laden!");
 		OnCancel();
 	}
@@ -87,7 +99,7 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
 			m_field[i][j] = m_field[0][0];
-			m_field[i][j].SetMatrixPos(i, j);
+			
 			m_field[i][j].SetZ(1);
 			m_field[i][j].SetPosition(908 + (79 * i), 67 + (79 * j));
 			m_field[i][j].SetAlpha(0.0f);
@@ -143,6 +155,8 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	m_list.SetWorkspace(&m_buff);
 	m_list.Insert(&m_startbkg);
 	m_list.Insert(&m_startbutton);
+
+	playernum = 0;
 	
 
 	return TRUE;  // TRUE zurückgeben, wenn der Fokus nicht auf ein Steuerelement gesetzt wird
@@ -180,6 +194,7 @@ void CMFCBelegDlg::OnPaint()
 	}
 }
 
+
 // Die System ruft diese Funktion auf, um den Cursor abzufragen, der angezeigt wird, während der Benutzer
 //  das minimierte Fenster mit der Maus zieht.
 HCURSOR CMFCBelegDlg::OnQueryDragIcon()
@@ -203,11 +218,19 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		statemachine(0, NULL);
 	}
 
-	//Für Würfelbutton
+	//Würfelbutton
 	if (hit == &m_dicebutton) {
 		statemachine(4, NULL);
 	}
 
+	//Start Button
+	if (hit == &m_menubutton[0]) {
+		statemachine(3, NULL);
+	}
+	//Reset Button
+	if (hit == &m_menubutton[1]) {
+		statemachine(2, NULL);
+	}
 	//Ende Button
 	if (hit == &m_menubutton[3]) {
 		statemachine(1, NULL);
@@ -216,18 +239,19 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	if (hit == &m_nextbutton) {
 		statemachine(6, NULL);
 	}
-	if (hit == &m_menubutton[0]) {
-		statemachine(3, NULL);
-	}
-	else {
-		if (hit != NULL) {
-			statemachine(7, point);
+	for (int i = 0; i < 12; i++) {
+		for (int j = 0; j < 12; j++) {
+			if (hit == &m_field[i][j]) {
+				statemachine(7, point);
+			}
 		}
 	}
+
 	m_list.Update(&dc, 0, 0);
 
 	CDialogEx::OnLButtonDown(nFlags, point);
 }
+
 
 
 void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
@@ -269,6 +293,7 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 }
 
 
+
 //Wird beim Klick auf den Start button im Startmenu aufgerufen; initialisiert das Spielfeld
 void CMFCBelegDlg::InitGame(){
 	m_startbutton.SetPosition(1921, 0);
@@ -277,6 +302,7 @@ void CMFCBelegDlg::InitGame(){
 	m_buff.Load("Hintergrund.bmp");
 	m_list.Insert(&m_bkg);
 
+	
 	m_list.Insert(&m_dicebutton);
 	m_list.Insert(&m_dice[0]);
 	m_list.Insert(&m_dice[1]);
@@ -289,6 +315,7 @@ void CMFCBelegDlg::InitGame(){
 			m_list.Insert(&m_field[i][j]);
 		}
 	}
+	return;
 }
 
 
@@ -298,7 +325,7 @@ void CMFCBelegDlg::InitDice(){
 	SetTimer(1, 75, NULL);
 	SetTimer(2, 2000, NULL);
 	
-
+	return;
 }
 
 
@@ -325,17 +352,42 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 	CDialogEx::OnTimer(nIDEvent);
 }
 
-void CMFCBelegDlg::game(bool player) {
-
+void CMFCBelegDlg::game(bool playerchange) {
+	
+	if (playerchange == TRUE) {
+		if (playernum == 0) playernum = 1;
+		else playernum = 0;
+	}
+	m_font.SetPosition(100, 150);
+	m_font.SetSpriteNumber(0, playernum);
+	
 	return;
 }
+
 
 void CMFCBelegDlg::set_field(CPoint point) {
 
 	CSprite *hit = m_list.HitTest(point);
 
-	hit->SetAlpha(1.0f);
+	if (hit->GetState()) return;
+	else {
+		hit->SetSpriteNumber(0, playernum);
+		hit->SetAlpha(1.0f);
+		hit->SetState(TRUE);
+	}
 
+	return;
+}
+
+
+void CMFCBelegDlg::reset_game() {
+
+	for (int i = 0; i < 12; i++) {
+		for (int j = 0; j < 12; j++) {
+			m_field[i][j].SetAlpha(0.0f);
+		}
+	}
+	m_font.SetPosition(1921, 0);
 }
 
 
@@ -350,17 +402,21 @@ void CMFCBelegDlg::statemachine(int event, CPoint point) {
 		break;
 	case 2: OnCancel();
 		break;
-	case 3: //game(TRUE)
+	case 3: game(FALSE);
 		break;
 	case 4: InitDice();
 		break;
 	case 5: KillTimer(1);
 		break;
-	case 6: //reset_game()
+	case 6: reset_game();
 		break;
-	case 7: //game(FALSE)
+	case 7: game(TRUE);
 		break;
 	case 8: set_field(point);
+		break;
+	case 9: //show_info()
+		break;
+	case 10: //close_info()
 		break;
 	}
 	m_state = m_table[event][m_state].next_state;
