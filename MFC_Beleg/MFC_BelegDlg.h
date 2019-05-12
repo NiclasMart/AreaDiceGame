@@ -4,7 +4,8 @@
 
 #pragma once
 #include "spritelib.h";
-#include "CSpriteField.h"
+#include "CSpriteMatrix.h";
+
 
 
 // CMFCBelegDlg-Dialogfeld
@@ -23,15 +24,17 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
 	CDIB m_buff;
 	CSprite m_startbkg, m_bkg, m_startbutton, m_menubutton[4], m_dicebutton, m_nextbutton, m_dice[2], m_font;
-	CSprite m_field[12][12];
+	/*CSprite m_field[12][12];*/
+	CSpriteMatrix Matrix;
 	CSpriteList m_list;
-	int playernum;
+	int player_num;
+	int dice_value;
 	void InitDice();
 	void InitGame();
-	void game(bool playerchange);
-	void set_field(CPoint point);
-	void reset_game();
-	void statemachine(int event, CPoint point);
+	void Game(bool playerchange);
+	void SetField(CPoint point);
+	void ResetGame();
+	void Statemachine(int event, CPoint point);
 
 	int m_state;
 	struct {

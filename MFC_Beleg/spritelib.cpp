@@ -566,7 +566,6 @@ CSprite::CSprite()
     m_alpha  = 1.f;
     m_bTrans = TRUE;
     m_dirty  = CRect(0,0,0,0);
-	field_state = FALSE;
 }
 
 CSprite::CSprite(CSprite& b) {
@@ -1181,14 +1180,4 @@ float CSpriteList::fpsWriter(bool write)
         m_fpscount = 0; m_fpstime = t2;
     }
     return fps;
-}
-
-bool CSprite::GetState() {
-
-	return field_state;
-}
-
-void CSprite::SetState(bool state) {
-
-	field_state = state;
 }

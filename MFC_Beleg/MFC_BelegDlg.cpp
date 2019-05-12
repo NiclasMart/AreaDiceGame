@@ -76,21 +76,21 @@ BOOL CMFCBelegDlg::OnInitDialog()
 
 
 	//Feld Sprite BMP laden
-	if (!m_field[0][0].Load("94x84_Sprite_4.bmp", CSize(94, 85))) {
+	if (!Matrix.m_field[0][0].Load("94x84_Sprite_4.bmp", CSize(94, 85))) {
 		AfxMessageBox(L"Konnte 94x84_Sprite_4.bmp nicht laden!");
 		OnCancel();
 	}
 
 	//Würfel Sprite BMP laden
-	if (!m_dice[0].Load("241x233_Wuerfel_3x2.bmp", CSize(241, 233))) {
-		AfxMessageBox(L"Konnte 241x233_Wuerfel_3x2.bmp nicht laden!");
+	if (!m_dice[0].Load("200x170_Wuerfel_6.bmp", CSize(200, 170))) {
+		AfxMessageBox(L"Konnte 200x170_Wuerfel_6.bmp nicht laden!");
 		OnCancel();
 	}
 
 	m_dice[1] = m_dice[0];
 	for (int i = 0; i < 2; i++){
 		m_dice[i].SetZ(10);
-		m_dice[i].SetSpriteNumber(rand() % 3, rand() % 2);
+		m_dice[i].SetSpriteNumber(0, rand() % 6);
 		m_dice[i].SetPosition(260 + i*200, 850);
 	}
 	
@@ -98,11 +98,11 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	//Initialisieren aller Feldinhalte der Matrix
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
-			m_field[i][j] = m_field[0][0];
+			Matrix.m_field[i][j] = Matrix.m_field[0][0];
 			
-			m_field[i][j].SetZ(1);
-			m_field[i][j].SetPosition(908 + (79 * i), 67 + (79 * j));
-			m_field[i][j].SetAlpha(0.0f);
+			Matrix.m_field[i][j].SetZ(1);
+			Matrix.m_field[i][j].SetPosition(908 + (79 * i), 67 + (79 * j));
+			Matrix.m_field[i][j].SetAlpha(0.0f);
 		}
 	}
 
@@ -156,7 +156,7 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	m_list.Insert(&m_startbkg);
 	m_list.Insert(&m_startbutton);
 
-	playernum = 0;
+	player_num = 0;
 	
 
 	return TRUE;  // TRUE zurückgeben, wenn der Fokus nicht auf ein Steuerelement gesetzt wird
@@ -215,34 +215,34 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		-Puffer wird mit neuem Hintergrund initialisiert 
 		-alle Feldsprites werden in die Liste geladen*/
 	if (hit == &m_startbutton) {
-		statemachine(0, NULL);
+		Statemachine(0, NULL);
 	}
 
 	//Würfelbutton
 	if (hit == &m_dicebutton) {
-		statemachine(4, NULL);
+		Statemachine(4, NULL);
 	}
 
 	//Start Button
 	if (hit == &m_menubutton[0]) {
-		statemachine(3, NULL);
+		Statemachine(3, NULL);
 	}
 	//Reset Button
 	if (hit == &m_menubutton[1]) {
-		statemachine(2, NULL);
+		Statemachine(2, NULL);
 	}
 	//Ende Button
 	if (hit == &m_menubutton[3]) {
-		statemachine(1, NULL);
+		Statemachine(1, NULL);
 	}
 
 	if (hit == &m_nextbutton) {
-		statemachine(6, NULL);
+		Statemachine(6, NULL);
 	}
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
-			if (hit == &m_field[i][j]) {
-				statemachine(7, point);
+			if (hit == &Matrix.m_field[i][j]) {
+				Statemachine(7, point);
 			}
 		}
 	}
@@ -312,7 +312,7 @@ void CMFCBelegDlg::InitGame(){
 	}
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
-			m_list.Insert(&m_field[i][j]);
+			m_list.Insert(&Matrix.m_field[i][j]);
 		}
 	}
 	return;
@@ -338,13 +338,14 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 	if (nIDEvent == 2) {
 		KillTimer(1);
 		KillTimer(2);
-		statemachine(5, NULL);
+		Statemachine(5, NULL);
 	}
 	else {
 		if (nIDEvent == 1) {
-			m_dice[0].SetSpriteNumber(rand() % 3, rand() % 2);
-			m_dice[1].SetSpriteNumber(rand() % 3, rand() % 2);
+			m_dice[0].SetSpriteNumber(0, rand() % 6);
+			m_dice[1].SetSpriteNumber(0, rand() % 6);
 			m_list.Update(&dc, 0, 0);
+
 		}
 	}
 	
@@ -352,46 +353,47 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 	CDialogEx::OnTimer(nIDEvent);
 }
 
-void CMFCBelegDlg::game(bool playerchange) {
+void CMFCBelegDlg::Game(bool playerchange) {
 	
 	if (playerchange == TRUE) {
-		if (playernum == 0) playernum = 1;
-		else playernum = 0;
+		if (player_num == 0) player_num = 1;
+		else player_num = 0;
 	}
 	m_font.SetPosition(100, 150);
-	m_font.SetSpriteNumber(0, playernum);
+	m_font.SetSpriteNumber(0, player_num);
 	
 	return;
 }
 
 
-void CMFCBelegDlg::set_field(CPoint point) {
+void CMFCBelegDlg::SetField(CPoint point) {
 
 	CSprite *hit = m_list.HitTest(point);
 
-	if (hit->GetState()) return;
+	if (Matrix.SearchField(hit)) return;
 	else {
-		hit->SetSpriteNumber(0, playernum);
+		hit->SetSpriteNumber(0, player_num);
 		hit->SetAlpha(1.0f);
-		hit->SetState(TRUE);
+		Matrix.SetFieldState(hit, TRUE);
 	}
 
 	return;
 }
 
 
-void CMFCBelegDlg::reset_game() {
+void CMFCBelegDlg::ResetGame() {
 
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
-			m_field[i][j].SetAlpha(0.0f);
+			Matrix.m_field[i][j].SetAlpha(0.0f);
 		}
 	}
 	m_font.SetPosition(1921, 0);
+	player_num = 0;
 }
 
 
-void CMFCBelegDlg::statemachine(int event, CPoint point) {
+void CMFCBelegDlg::Statemachine(int event, CPoint point) {
 
 	switch (m_table[event][m_state].action) {
 	case -1: return;
@@ -402,17 +404,17 @@ void CMFCBelegDlg::statemachine(int event, CPoint point) {
 		break;
 	case 2: OnCancel();
 		break;
-	case 3: game(FALSE);
+	case 3: Game(FALSE);
 		break;
 	case 4: InitDice();
 		break;
 	case 5: KillTimer(1);
 		break;
-	case 6: reset_game();
+	case 6: ResetGame();
 		break;
-	case 7: game(TRUE);
+	case 7: Game(TRUE);
 		break;
-	case 8: set_field(point);
+	case 8: SetField(point);
 		break;
 	case 9: //show_info()
 		break;

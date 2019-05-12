@@ -113,8 +113,6 @@ public:
     void    GetRect(CRect* pRect); // liefert die Position und die Ausdehnung des Sprites in der Szene
     void    SetAlpha(float a); // setzt den Alphakanal 0.0 ... 1.0
     float   GetAlpha();     // liefert den aktuellen Wert für die Spritetransparenz
-	bool	GetState();
-	void	SetState(bool state);
 
     //Spriteparamerter Höhe,Breite
     int     GetXW();        // liefert die Breite eines Sprites in einem Mehrfachsprite
@@ -151,7 +149,6 @@ protected:
     float m_alpha;  // alpha channel 0.0f ... 1.0f
     BOOL m_bTrans;  // Transparency color flag
     CRect m_dirty;  // dirty region (for sprite updates)
-	bool field_state;
 };
 
 
