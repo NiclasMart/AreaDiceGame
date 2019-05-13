@@ -24,23 +24,28 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
 	CDIB m_buff;
 	CSprite m_startbkg, m_bkg, m_startbutton, m_menubutton[4], m_dicebutton, m_nextbutton, m_dice[2], m_font;
-	/*CSprite m_field[12][12];*/
 	CSpriteMatrix Matrix;
 	CSpriteList m_list;
+
 	int player_num;
-	int dice_value;
+	int dice_value[2];
+
 	void InitDice();
 	void InitGame();
 	void Game(bool playerchange);
 	void SetField(CPoint point);
 	void ResetGame();
-	void Statemachine(int event, CPoint point);
+	void ShowField(CPoint point);
+	bool Statemachine(int event, CPoint point);
+	int helpfunc_1(int x, int i);
+	int helpfunc_2(int x, int i);
+
 
 	int m_state;
 	struct {
 		int next_state;
 		int action;
-	}m_table[10][5] = {
+	}m_table[11][5] = {
 	   {{1, 1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}},
 	   {{-1, -1}, {1, 2}, {2, 2}, {2, 2}, {4, 2}},
 	   {{-1, -1}, {-1, -1}, {1, 6}, {1, 6}, {1, 6}},
@@ -50,7 +55,8 @@ public:
 	   {{-1, -1}, {-1, -1}, {-1, -1}, {2, 7}, {-1, -1}},
 	   {{-1, -1}, {-1, -1}, {-1, -1}, {3, 8}, {-1, -1}},
 	   {{-1, -1}, {1, 9}, {2, 9}, {3, 9}, {4, 9}},
-	   {{-1, -1}, {1, 10}, {2, 10}, {3, 10}, {4, 10}}
+	   {{-1, -1}, {1, 10}, {2, 10}, {3, 10}, {4, 10}},
+	   {{-1, -1}, {-1, -1}, {-1, -1}, {3, 11}, {-1, -1}}
 	};
 
 
