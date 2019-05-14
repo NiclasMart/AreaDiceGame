@@ -33,31 +33,19 @@ public:
 	void InitDice();
 	void InitGame();
 	void Game(bool playerchange);
-	void SetField(CPoint point);
+	void SetField();
 	void ResetGame();
 	void ShowField(CPoint point);
-	bool Statemachine(int event, CPoint point);
+	bool Statemachine(int event);
 	int helpfunc_1(int x, int i);
 	int helpfunc_2(int x, int i);
 
 
 	int m_state;
-	struct {
+	struct tab {
 		int next_state;
 		int action;
-	}m_table[11][5] = {
-	   {{1, 1}, {-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}},
-	   {{-1, -1}, {1, 2}, {2, 2}, {2, 2}, {4, 2}},
-	   {{-1, -1}, {-1, -1}, {1, 6}, {1, 6}, {1, 6}},
-	   {{-1, -1}, {2, 3}, {-1, -1}, {-1, -1}, {-1, -1}},
-	   {{-1, -1}, {-1, -1}, {4, 4}, {-1, -1}, {-1, -1}},
-	   {{-1, -1}, {-1, -1}, {-1, -1}, {-1, -1}, {3, 5}},
-	   {{-1, -1}, {-1, -1}, {-1, -1}, {2, 7}, {-1, -1}},
-	   {{-1, -1}, {-1, -1}, {-1, -1}, {3, 8}, {-1, -1}},
-	   {{-1, -1}, {1, 9}, {2, 9}, {3, 9}, {4, 9}},
-	   {{-1, -1}, {1, 10}, {2, 10}, {3, 10}, {4, 10}},
-	   {{-1, -1}, {-1, -1}, {-1, -1}, {3, 11}, {-1, -1}}
-	};
+	} m_table[11][5];
 
 
 // Implementierung

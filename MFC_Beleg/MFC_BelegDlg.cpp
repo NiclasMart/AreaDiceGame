@@ -53,9 +53,22 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	// TODO: Hier zusätzliche Initialisierung einfügen
 	srand((unsigned)time(NULL));
 
-	//Anfangszustand setzen (Zustand: Spielstart)
+	//Anfangszustand setzen (Zustand: Spielstart) und  Zustandsmatrix initialisieren
 	m_state = 0;
-	
+	struct tab  table[11][5] = {
+		{ { 1, 1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
+		{ { -1, -1 }, { 1, 2 }, { 2, 2 }, { 2, 2 }, { 4, 2 } },
+		{ { -1, -1 }, { -1, -1 }, { 1, 6 }, { 1, 6 }, { 1, 6 } },
+		{ { -1, -1 }, { 2, 3 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
+		{ { -1, -1 }, { -1, -1 }, { 4, 4 }, { -1, -1 }, { -1, -1 } },
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 5 } },
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 2, 7 }, { -1, -1 } },
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 8 }, { -1, -1 } },
+		{ { -1, -1 }, { 1, 9 }, { 2, 9 }, { 3, 9 }, { 4, 9 } },
+		{ { -1, -1 }, { 1, 10 }, { 2, 10 }, { 3, 10 }, { 4, 10 } },
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 11 }, { -1, -1 } }
+	};
+	memcpy(m_table, table, sizeof(table));
 	
 	//Spielhintergrund BMP laden
 	if (!m_bkg.Load("Hintergrund.bmp")) {
@@ -89,8 +102,7 @@ BOOL CMFCBelegDlg::OnInitDialog()
 			Matrix.m_field[i][j].SetZ(2);
 			Matrix.m_field[i][j].SetPosition(908 + (79 * i), 67 + (79 * j));
 			Matrix.m_field[i][j].SetAlpha(0.0f);
-			Matrix.transparent_field[i][j] = Matrix.m_field[i][j];
-			Matrix.transparent_field[i][j].SetZ(1);
+			
 		}
 	}
 
@@ -218,37 +230,34 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		-Puffer wird mit neuem Hintergrund initialisiert 
 		-alle Feldsprites werden in die Liste geladen*/
 	if (hit == &m_startbutton) {
-		Statemachine(0, NULL);
+		Statemachine(0);
 	}
 
 	//Würfelbutton
 	if (hit == &m_dicebutton) {
-		Statemachine(4, NULL);
+		Statemachine(4);
 	}
 
 	//Start Button
 	if (hit == &m_menubutton[0]) {
-		Statemachine(3, NULL);
+		Statemachine(3);
 	}
 	//Reset Button
 	if (hit == &m_menubutton[1]) {
-		Statemachine(2, NULL);
+		Statemachine(2);
 	}
 	//Ende Button
 	if (hit == &m_menubutton[3]) {
-		Statemachine(1, NULL);
+		Statemachine(1);
 	}
 	//Next Button
 	if (hit == &m_nextbutton) {
-		Statemachine(6, NULL);
+		Statemachine(6);
 	}
 
-	for (int i = 0; i < 12; i++) {
-		for (int j = 0; j < 12; j++) {
-			if (hit == &Matrix.m_field[i][j]) {
-				Statemachine(7, NULL);
-			}
-		}
+	CFieldSprite *hit2 = dynamic_cast<CFieldSprite*>(hit);						//dynamic Cast -> wenn Cast erfolgreich muss es sich um ein Matrix Feld handeln
+	if ((hit2 != NULL)) {
+		Statemachine(7);
 	}
 
 	m_list.Update(&dc, 0, 0);
@@ -291,29 +300,20 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 	}
 
 	//Spielfelder
-	if (hit == &m_bkg) Matrix.ResetBuff();												//falls Spielfeld verlassen, setzte alles zurück
-	if (Statemachine(10, NULL)) {				
-		
-		for (int i = 0; i < 12; i++) {
-			for (int j = 0; j < 12; j++) {
-				if ((hit == &Matrix.m_field[i][j]) && (Matrix.pt_field != hit)) {		//wenn getroffenes Sprite mit einem Spielfeld übereinstimmt und es sich um ein neues Feld handelt tue ...
-					Matrix.ResetBuff();												
-					Matrix.pt_field = hit;												//speicher die Adresse des Feldes auf welches gezeigt wird
-					for (int n = 0; n < dice_value[0]; n++) {							//schreibe die Felder der Würfelzahl entsprechend in eine Puffermatrix
-						for (int m = 0; m < dice_value[1]; m++) {
-							Matrix.preview_buff[n][m] = &Matrix.transparent_field[i + helpfunc_2(m, i)][j - helpfunc_1(n, j)];
-							Matrix.preview_buff[n][m]->SetSpriteNumber(0, player_num);
-							Matrix.field_buff[n][m] = &Matrix.m_field[i + helpfunc_2(m, i)][j - helpfunc_1(n, j)];
-							Matrix.field_buff[n][m]->SetSpriteNumber(0, player_num);
-						}
-					}
-					Matrix.DrawPrevBuff();													//zeichne die Puffermatrix
-					
-				}
-			}
+	if (hit == &m_bkg) Matrix.ResetBuff();										//falls Spielfeld verlassen, setzte alles zurück
+	CFieldSprite *hit2 = dynamic_cast<CFieldSprite*>(hit);						//dynamic Cast -> wenn Cast erfolgreich muss es sich um ein Matrix Feld handeln
+	if ((Statemachine(10)) && (hit2 != NULL)) {									//Prüft ob Zustand eine Feldeingabe erlaubt und ob Cast erfolgreich (damit Matrix Feld
+		if (Matrix.pt_field != hit2) {											//wenn sich Maus auf ein neues Feld verschiebt, wird Neuzeichnen eingeleitet, ansonsten nicht
+			Matrix.ResetBuff();													//Setzt alle Inhalte der Puffer (Vorschaupuffer und Zeichenpuffer zurück				
+			Matrix.pt_field = hit2;												//speicher die Adresse des Feldes auf welches gezeigt wird
+			Matrix.SetBuff(hit2, dice_value[0], dice_value[1], player_num);		//Puffer werden neu geladen
+			Matrix.DrawPrevBuff();												//zeichne die Vorschau Puffermatrix
 		}
-		
+															
 	}
+
+		
+	
 	m_list.Update(&dc, 0, 0);
 
 	CDialogEx::OnMouseMove(nFlags, point);
@@ -354,7 +354,6 @@ void CMFCBelegDlg::InitGame(){
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
 			m_list.Insert(&Matrix.m_field[i][j]);
-			m_list.Insert(&Matrix.transparent_field[i][j]);
 		}
 	}
 	return;
@@ -380,7 +379,7 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 	if (nIDEvent == 2) {
 		KillTimer(1);
 		KillTimer(2);
-		Statemachine(5, NULL);
+		Statemachine(5);
 	}
 	else {
 		if (nIDEvent == 1) {
@@ -415,19 +414,11 @@ void CMFCBelegDlg::Game(bool playerchange) {
 
 
 //angecklicktes Feld wird sichtbar gemacht
-void CMFCBelegDlg::SetField(CPoint point) {
+void CMFCBelegDlg::SetField() {
 
-	CSprite *hit = m_list.HitTest(point);
-
-	///*if (Matrix.SearchField(hit)) return;
-	//else {*/
-		Matrix.DrawFieldBuff();
-		Matrix.ResetBuff();
-		//*hit->SetSpriteNumber(0, player_num);
-		//hit->SetAlpha(1.0f);*/
-		/*Matrix.SetFieldState(hit, TRUE);*/
-	/*}*/
-
+	Matrix.DrawFieldBuff();
+	Matrix.ResetBuff();
+		
 	return;
 }
 
@@ -446,7 +437,7 @@ void CMFCBelegDlg::ResetGame() {
 
 
 //bestimmt anhand des Momentanen Zustands und des eingetroffenen Ereignisses die folgende Aktion
-bool CMFCBelegDlg::Statemachine(int event, CPoint point) {
+bool CMFCBelegDlg::Statemachine(int event) {
 
 	switch (m_table[event][m_state].action) {
 	case -1: return FALSE;
@@ -467,7 +458,7 @@ bool CMFCBelegDlg::Statemachine(int event, CPoint point) {
 		break;
 	case 7: Game(TRUE);
 		break;
-	case 8: SetField(point);
+	case 8: SetField();
 		break;
 	case 9: //show_info()
 		break;

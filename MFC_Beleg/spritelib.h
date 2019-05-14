@@ -131,7 +131,7 @@ public:
     //Erweiterte - Funktionen
     BOOL    HitTest(CPoint point,BOOL ignoretransparenz=FALSE);
     BOOL    IsPixelTransparent(CPoint);
-    BOOL    CrashTest(CSprite* pS1);
+	BOOL    CrashTest(CSprite* pS1);
 
     //Dirtyregion-Funktionen
     void    GetDirtyRect(CRect* pRect);
