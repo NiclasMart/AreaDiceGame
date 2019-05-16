@@ -6,6 +6,7 @@ public:
 	CFieldSprite();
 	~CFieldSprite();
 	bool state;
+	void ResetState();
 
 protected:
 	

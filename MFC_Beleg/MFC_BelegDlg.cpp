@@ -55,14 +55,13 @@ BOOL CMFCBelegDlg::OnInitDialog()
 
 	//Anfangszustand setzen (Zustand: Spielstart) und  Zustandsmatrix initialisieren
 	m_state = 0;
-	struct tab  table[11][5] = {
+	struct tab  table[10][5] = {
 		{ { 1, 1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
 		{ { -1, -1 }, { 1, 2 }, { 2, 2 }, { 2, 2 }, { 4, 2 } },
 		{ { -1, -1 }, { -1, -1 }, { 1, 6 }, { 1, 6 }, { 1, 6 } },
 		{ { -1, -1 }, { 2, 3 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
 		{ { -1, -1 }, { -1, -1 }, { 4, 4 }, { -1, -1 }, { -1, -1 } },
 		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 5 } },
-		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 2, 7 }, { -1, -1 } },
 		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 8 }, { -1, -1 } },
 		{ { -1, -1 }, { 1, 9 }, { 2, 9 }, { 3, 9 }, { 4, 9 } },
 		{ { -1, -1 }, { 1, 10 }, { 2, 10 }, { 3, 10 }, { 4, 10 } },
@@ -250,14 +249,10 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	if (hit == &m_menubutton[3]) {
 		Statemachine(1);
 	}
-	//Next Button
-	if (hit == &m_nextbutton) {
-		Statemachine(6);
-	}
 
 	CFieldSprite *hit2 = dynamic_cast<CFieldSprite*>(hit);						//dynamic Cast -> wenn Cast erfolgreich muss es sich um ein Matrix Feld handeln
 	if ((hit2 != NULL)) {
-		Statemachine(7);
+		if (Statemachine(6)) m_state = 2;
 	}
 
 	m_list.Update(&dc, 0, 0);
@@ -302,7 +297,7 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 	//Spielfelder
 	if (hit == &m_bkg) Matrix.ResetBuff();										//falls Spielfeld verlassen, setzte alles zurück
 	CFieldSprite *hit2 = dynamic_cast<CFieldSprite*>(hit);						//dynamic Cast -> wenn Cast erfolgreich muss es sich um ein Matrix Feld handeln
-	if ((Statemachine(10)) && (hit2 != NULL)) {									//Prüft ob Zustand eine Feldeingabe erlaubt und ob Cast erfolgreich (damit Matrix Feld
+	if ((Statemachine(9)) && (hit2 != NULL)) {									//Prüft ob Zustand eine Feldeingabe erlaubt und ob Cast erfolgreich (damit Matrix Feld
 		if (Matrix.pt_field != hit2) {											//wenn sich Maus auf ein neues Feld verschiebt, wird Neuzeichnen eingeleitet, ansonsten nicht
 			Matrix.ResetBuff();													//Setzt alle Inhalte der Puffer (Vorschaupuffer und Zeichenpuffer zurück				
 			Matrix.pt_field = hit2;												//speicher die Adresse des Feldes auf welches gezeigt wird
@@ -318,21 +313,6 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 
 	CDialogEx::OnMouseMove(nFlags, point);
 }
-
-
-//Hilfsfunktionen für Vorschauanzeige, damit keine Elemente auserhalb des Vektors addressiert werden
-int CMFCBelegDlg::helpfunc_2(int x, int i) {
-
-	if ((i + x) > 11) return 11 - i;
-	return x;
-}
-
-int CMFCBelegDlg::helpfunc_1(int x, int i){
-
-	if ((i - x) < 0) return i;
-	return x;
-}
-
 
 
 //Wird beim Klick auf den Start button im Startmenu aufgerufen; initialisiert das Spielfeld
@@ -414,12 +394,16 @@ void CMFCBelegDlg::Game(bool playerchange) {
 
 
 //angecklicktes Feld wird sichtbar gemacht
-void CMFCBelegDlg::SetField() {
+bool CMFCBelegDlg::SetField() {
 
-	Matrix.DrawFieldBuff();
+	if (Matrix.DrawFieldBuff()){
+		Game(TRUE);
+		Matrix.ResetBuff();
+		return TRUE;
+	}
+	
 	Matrix.ResetBuff();
-		
-	return;
+	return FALSE;
 }
 
 
@@ -433,6 +417,7 @@ void CMFCBelegDlg::ResetGame() {
 	}
 	m_font.SetPosition(1921, 0);
 	player_num = 0;
+	Matrix.ResetState();
 }
 
 
@@ -456,9 +441,7 @@ bool CMFCBelegDlg::Statemachine(int event) {
 		break;
 	case 6: ResetGame();
 		break;
-	case 7: Game(TRUE);
-		break;
-	case 8: SetField();
+	case 8: return SetField();
 		break;
 	case 9: //show_info()
 		break;

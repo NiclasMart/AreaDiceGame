@@ -17,8 +17,13 @@ public:
 	bool TestArea(int feld_x, int feld_y, int wuerfel_breite, int wuerfel_hoehe, int spieler);*/
 	void SetFieldState();
 	void DrawPrevBuff();
-	void DrawFieldBuff();
+	bool DrawFieldBuff();
 	void ResetBuff();
+	void ResetFieldBuff();
+	void ResetState();
+
+	int helpfunc_1(int n, CFieldSprite* field);
+	int helpfunc_2(int x, int i);
 	
 	
 

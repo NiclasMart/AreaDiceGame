@@ -11,3 +11,7 @@ CFieldSprite::CFieldSprite()
 CFieldSprite::~CFieldSprite()
 {
 }
+
+void CFieldSprite::ResetState() {
+	state = TRUE;
+}

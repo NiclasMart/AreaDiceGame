@@ -33,19 +33,18 @@ public:
 	void InitDice();
 	void InitGame();
 	void Game(bool playerchange);
-	void SetField();
+	bool SetField();
 	void ResetGame();
 	void ShowField(CPoint point);
 	bool Statemachine(int event);
-	int helpfunc_1(int x, int i);
-	int helpfunc_2(int x, int i);
+	
 
 
 	int m_state;
 	struct tab {
 		int next_state;
 		int action;
-	} m_table[11][5];
+	} m_table[10][5];
 
 
 // Implementierung
