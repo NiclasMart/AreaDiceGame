@@ -45,7 +45,7 @@ public:
 	struct tab {
 		int next_state;
 		int action;
-	} m_table[11][5];
+	} m_table[12][5];
 
 
 // Implementierung

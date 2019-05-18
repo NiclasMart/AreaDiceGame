@@ -59,7 +59,7 @@ BOOL CMFCBelegDlg::OnInitDialog()
 
 	//Anfangszustand setzen (Zustand: Spielstart) und  Zustandsmatrix initialisieren
 	m_state = 0;
-	struct tab  table[11][5] = {
+	struct tab  table[12][5] = {
 		{ { 1, 1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
 		{ { -1, -1 }, { 1, 2 }, { 2, 2 }, { 2, 2 }, { 4, 2 } },
 		{ { -1, -1 }, { -1, -1 }, { 1, 6 }, { 1, 6 }, { 1, 6 } },
@@ -70,7 +70,8 @@ BOOL CMFCBelegDlg::OnInitDialog()
 		{ { -1, -1 }, { 1, 9 }, { 2, 9 }, { 3, 9 }, { 4, 9 } },
 		{ { -1, -1 }, { 1, 10 }, { 2, 10 }, { 3, 10 }, { 4, 10 } },
 		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 11 }, { -1, -1 } },
-		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 7 }, { -1, -1 } }
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 7 }, { -1, -1 } },
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 2, 12 }, { -1, -1 } }
 	};
 	memcpy(m_table, table, sizeof(table));
 	
@@ -254,6 +255,10 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	if (hit == &m_menubutton[3]) {
 		Statemachine(1);
 	}
+	//Next Button
+	if (hit == &m_nextbutton) {
+		Statemachine(11);
+	}
 
 	CFieldSprite *hit2 = dynamic_cast<CFieldSprite*>(hit);						//dynamic Cast -> wenn Cast erfolgreich muss es sich um ein Matrix Feld handeln
 	if ((hit2 != NULL)) {
@@ -318,6 +323,17 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 
 	CDialogEx::OnMouseMove(nFlags, point);
 }
+
+
+
+//erkennt Tastendruck auf R und schickt dann das entsprechende Ereignis zur Drehung des Vorschaufeldes
+void CMFCBelegDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: Fügen Sie hier Ihren Meldungshandlercode ein, und/oder benutzen Sie den Standard.
+	if (nChar == 0x52) Statemachine(10);
+	CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
 
 
 //Wird beim Klick auf den Start button im Startmenu aufgerufen; initialisiert das Spielfeld
@@ -429,16 +445,18 @@ void CMFCBelegDlg::ResetGame() {
 void CMFCBelegDlg::RotateField() {
 	CClientDC dc(this);
 
-	int temp = dice_value[0];
+	int temp = dice_value[0];														//Würfelzahlen vertauschen
 	dice_value[0] = dice_value[1];
 	dice_value[1] = temp;
 
-	CFieldSprite* pt = Matrix.pt_field;
+	if (Matrix.pt_field != NULL) {													//Checkt ob Maus auf bkg, wenn ja wird das Feld nicht neu gezeichnet 
+		CFieldSprite* pt = Matrix.pt_field;											//aktuelles Feld wird zwischengespeicher (notwendig wegen ResetBuff())
 
-	Matrix.ResetBuff();
-	Matrix.pt_field = pt;
-	Matrix.SetBuff(pt, dice_value[0], dice_value[1], player_num);
-	Matrix.DrawPrevBuff();
+		Matrix.ResetBuff();
+		Matrix.pt_field = pt;														//zurückschreiben des Feldes auf den Feld Pointer
+		Matrix.SetBuff(Matrix.pt_field, dice_value[0], dice_value[1], player_num);	//Puffer werden neu initialisiert mit vertauschten Würfelzahlen (Rotation) 
+		Matrix.DrawPrevBuff();								
+	}
 	m_list.Update(&dc, 0, 0);
 }
 
@@ -473,14 +491,11 @@ bool CMFCBelegDlg::Statemachine(int event) {
 		break;
 	case 11: return TRUE;
 		break;
+	case 12: Matrix.ResetBuff();
+			 Game(TRUE);
+		break;
 	}
 	m_state = m_table[event][m_state].next_state;
 }
 
 
-void CMFCBelegDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
-{
-	// TODO: Fügen Sie hier Ihren Meldungshandlercode ein, und/oder benutzen Sie den Standard.
-	Statemachine(10);
-	CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
-}

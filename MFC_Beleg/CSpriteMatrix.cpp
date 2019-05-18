@@ -13,6 +13,7 @@ CSpriteMatrix::CSpriteMatrix()
 		}
 	}
 	pt_field = NULL;
+	valid_field_pos = FALSE;
 }
 
 
@@ -20,17 +21,6 @@ CSpriteMatrix::~CSpriteMatrix()
 {
 }
 
-
-//bool CSpriteMatrix::GetFieldState(CFieldSprite* Sprite) {
-//
-//	//for (int i = 0; i < 12; i++) {
-//	//	for (int j = 0; j < 12; j++) {
-//	//		if (Sprite == &m_field[i][j]) {
-//	//			return field_state[i][j];
-//	//		}
-//	//	}
-//	//}
-//}
 
 //Setzt den Status aller sich im Field Puffer befindlichen Felder auf FALS
 void CSpriteMatrix::SetFieldState() {
@@ -83,27 +73,29 @@ void CSpriteMatrix::ResetFieldBuff() {
 //Zeichnet den Feld Puffer
 bool CSpriteMatrix::DrawFieldBuff() {
 
-	bool success = FALSE;
-	for (int i = 0; i < 6; i++) {
-		for (int j = 0; j < 6; j++) {
-			if (field_buff[i][j] != NULL) {
-				field_buff[i][j]->SetAlpha(1.0f);
-				field_buff[i][j]->state = FALSE;
-				success = TRUE;
+	/*bool success = FALSE;*/
+	if (valid_field_pos) {								//wenn Position erlaubt, kann das Feld gesetzt werden
+		for (int i = 0; i < 6; i++) {
+			for (int j = 0; j < 6; j++) {
+				if (field_buff[i][j] != NULL) {
+					field_buff[i][j]->SetAlpha(1.0f);
+					field_buff[i][j]->state = FALSE;
+					/*success = TRUE;*/
+				}
 			}
 		}
 	}
-	return success;
+	return valid_field_pos;
 
 }
 
 //Beide Puffer werden geladen
 void CSpriteMatrix::SetBuff(CFieldSprite *field, int w1, int w2, int player_num) {
 
-	bool valid_field_pos = TRUE;
+	valid_field_pos = TRUE;
 	for (int n = 0; n < w1; n++) {							//schreibe die Felder der Würfelzahl entsprechend in eine Puffermatrix
 		for (int m = 0; m < w2; m++) {
-			int aux_var = helpfunc_1(m, field);
+			int aux_var = helpfunc_1(m, field);												
 			if (((field + (12 * n)) - aux_var)->state == TRUE) {
 				((field + (12 * n)) - aux_var)->SetSpriteNumber(0, player_num);
 				preview_buff[n][m] = field_buff[n][m] = ((field + (12 * n)) - aux_var); 
@@ -111,7 +103,7 @@ void CSpriteMatrix::SetBuff(CFieldSprite *field, int w1, int w2, int player_num)
 			else valid_field_pos = FALSE;
 		}
 	}
-	if (!valid_field_pos) ResetFieldBuff();
+	/*if (!valid_field_pos) ResetFieldBuff();*/
 }
 
 
@@ -129,9 +121,12 @@ void CSpriteMatrix::ResetState() {
 
 int CSpriteMatrix::helpfunc_1(int n, CFieldSprite* field) {
 
-	int x = field - &m_field[0][0];
-	x = x % 12;
-	if (n > x) return x;
+	int x = field - &m_field[0][0];			//Position des Feldes in Matrix (Differenz erste Adress zu momentaner Adresse)
+	x = x % 12;								//Berechnung wie viele Felder noch bis zum Überschreiten der Reihe (bzw. Spalte)
+	if (n > x) {							//falls gewürfelte Zahl n größer als maximale Zeilenläge x, wird x zurück gegeben
+		valid_field_pos = FALSE;			//an diese Position darf das Feld dann nicht plaziert werden, da es aus der Matrix herausragt
+		return x;
+	}						
 	else return n;
 }
 
