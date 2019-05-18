@@ -37,6 +37,7 @@ public:
 	void ResetGame();
 	void ShowField(CPoint point);
 	bool Statemachine(int event);
+	void RotateField();
 	
 
 
@@ -44,7 +45,7 @@ public:
 	struct tab {
 		int next_state;
 		int action;
-	} m_table[10][5];
+	} m_table[11][5];
 
 
 // Implementierung
@@ -55,9 +56,11 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	afx_msg BOOL PreTranslateMessage(MSG* pMsg);
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 };

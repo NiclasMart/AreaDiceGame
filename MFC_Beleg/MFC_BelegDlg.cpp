@@ -36,9 +36,13 @@ BEGIN_MESSAGE_MAP(CMFCBelegDlg, CDialogEx)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
 	ON_WM_TIMER()
+	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
-
+BOOL CMFCBelegDlg::PreTranslateMessage(MSG* pMsg) {
+	// return CDialog::PreTranslateMessage(pMsg); 
+	return CWnd::PreTranslateMessage(pMsg); 
+}
 // CMFCBelegDlg-Meldungshandler
 
 BOOL CMFCBelegDlg::OnInitDialog()
@@ -55,7 +59,7 @@ BOOL CMFCBelegDlg::OnInitDialog()
 
 	//Anfangszustand setzen (Zustand: Spielstart) und  Zustandsmatrix initialisieren
 	m_state = 0;
-	struct tab  table[10][5] = {
+	struct tab  table[11][5] = {
 		{ { 1, 1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
 		{ { -1, -1 }, { 1, 2 }, { 2, 2 }, { 2, 2 }, { 4, 2 } },
 		{ { -1, -1 }, { -1, -1 }, { 1, 6 }, { 1, 6 }, { 1, 6 } },
@@ -65,7 +69,8 @@ BOOL CMFCBelegDlg::OnInitDialog()
 		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 8 }, { -1, -1 } },
 		{ { -1, -1 }, { 1, 9 }, { 2, 9 }, { 3, 9 }, { 4, 9 } },
 		{ { -1, -1 }, { 1, 10 }, { 2, 10 }, { 3, 10 }, { 4, 10 } },
-		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 11 }, { -1, -1 } }
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 11 }, { -1, -1 } },
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 7 }, { -1, -1 } }
 	};
 	memcpy(m_table, table, sizeof(table));
 	
@@ -252,7 +257,7 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 
 	CFieldSprite *hit2 = dynamic_cast<CFieldSprite*>(hit);						//dynamic Cast -> wenn Cast erfolgreich muss es sich um ein Matrix Feld handeln
 	if ((hit2 != NULL)) {
-		if (Statemachine(6)) m_state = 2;
+		if (Statemachine(6)) m_state = 2;										//falls das Setzen des Feldes erfolgreich war, wird der Spieler gewechselt
 	}
 
 	m_list.Update(&dc, 0, 0);
@@ -396,7 +401,7 @@ void CMFCBelegDlg::Game(bool playerchange) {
 //angecklicktes Feld wird sichtbar gemacht
 bool CMFCBelegDlg::SetField() {
 
-	if (Matrix.DrawFieldBuff()){
+	if (Matrix.DrawFieldBuff()){				//wenn Feld setzen erfolgreich, wird der Spieler gewechselt und beide Puffer resetet
 		Game(TRUE);
 		Matrix.ResetBuff();
 		return TRUE;
@@ -421,6 +426,23 @@ void CMFCBelegDlg::ResetGame() {
 }
 
 
+void CMFCBelegDlg::RotateField() {
+	CClientDC dc(this);
+
+	int temp = dice_value[0];
+	dice_value[0] = dice_value[1];
+	dice_value[1] = temp;
+
+	CFieldSprite* pt = Matrix.pt_field;
+
+	Matrix.ResetBuff();
+	Matrix.pt_field = pt;
+	Matrix.SetBuff(pt, dice_value[0], dice_value[1], player_num);
+	Matrix.DrawPrevBuff();
+	m_list.Update(&dc, 0, 0);
+}
+
+
 //bestimmt anhand des Momentanen Zustands und des eingetroffenen Ereignisses die folgende Aktion
 bool CMFCBelegDlg::Statemachine(int event) {
 
@@ -441,6 +463,8 @@ bool CMFCBelegDlg::Statemachine(int event) {
 		break;
 	case 6: ResetGame();
 		break;
+	case 7: RotateField();
+		break;
 	case 8: return SetField();
 		break;
 	case 9: //show_info()
@@ -451,4 +475,12 @@ bool CMFCBelegDlg::Statemachine(int event) {
 		break;
 	}
 	m_state = m_table[event][m_state].next_state;
+}
+
+
+void CMFCBelegDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: Fügen Sie hier Ihren Meldungshandlercode ein, und/oder benutzen Sie den Standard.
+	Statemachine(10);
+	CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
 }
