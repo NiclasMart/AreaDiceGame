@@ -59,19 +59,19 @@ BOOL CMFCBelegDlg::OnInitDialog()
 
 	//Anfangszustand setzen (Zustand: Spielstart) und  Zustandsmatrix initialisieren
 	m_state = 0;
-	struct tab  table[12][5] = {
-		{ { 1, 1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
-		{ { -1, -1 }, { 1, 2 }, { 2, 2 }, { 2, 2 }, { 4, 2 } },
-		{ { -1, -1 }, { -1, -1 }, { 1, 6 }, { 1, 6 }, { 1, 6 } },
-		{ { -1, -1 }, { 2, 3 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
-		{ { -1, -1 }, { -1, -1 }, { 4, 4 }, { -1, -1 }, { -1, -1 } },
-		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 5 } },
-		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 8 }, { -1, -1 } },
-		{ { -1, -1 }, { 1, 9 }, { 2, 9 }, { 3, 9 }, { 4, 9 } },
-		{ { -1, -1 }, { 1, 10 }, { 2, 10 }, { 3, 10 }, { 4, 10 } },
-		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 11 }, { -1, -1 } },
-		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 7 }, { -1, -1 } },
-		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 2, 12 }, { -1, -1 } }
+	struct tab  table[12][6] = {
+		{ { 1, 1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
+		{ { -1, -1 }, { 1, 2 }, { 2, 2 }, { 2, 2 }, { 4, 2 }, { 5, 2 } },
+		{ { -1, -1 }, { -1, -1 }, { 1, 6 }, { 1, 6 }, { 1, 6 }, { 1, 6 } },
+		{ { -1, -1 }, { 2, 3 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
+		{ { -1, -1 }, { -1, -1 }, { 4, 4 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 5 }, { -1, -1 } },
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 8 }, { -1, -1 }, { -1, -1 } },
+		{ { -1, -1 }, { 1, 9 }, { 2, 9 }, { 3, 9 }, { 4, 9 }, { 5, 9 } },
+		{ { -1, -1 }, { 1, 10 }, { 2, 10 }, { 3, 10 }, { 4, 10 }, { 5, 10 } },
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 11 }, { -1, -1 }, { -1, -1 } },
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 7 }, { -1, -1 }, { -1, -1 } },
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 2, 12 }, { -1, -1 }, { -1, -1 } }
 	};
 	memcpy(m_table, table, sizeof(table));
 	
@@ -83,16 +83,23 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	m_bkg.SetZ(0);
 	
 	//Schrift laden
-	if (!m_font.Load("325x50_Schrift_4.bmp", CSize(325, 50))) {
-		AfxMessageBox(L"Konnte 325x50_Schrift_4.bmp nicht laden!");
+	if (!m_font.Load("325x60_Schrift_4.bmp", CSize(325, 60))) {
+		AfxMessageBox(L"Konnte 325x60_Schrift_4.bmp nicht laden!");
 		OnCancel();
 	}
 	m_font.SetZ(40);
 	m_font.SetPosition(1921, 0);
 	m_list.Insert(&m_font);
 	
-
-
+	//Win Sprite laden
+	if (!m_win.Load("400x140_win_2.bmp", CSize(400, 140))) {
+		AfxMessageBox(L"Konnte 400x140_win_2.bmp nicht laden!");
+		OnCancel();
+	}
+	m_win.SetZ(60);
+	m_win.SetPosition(1921, 0);
+	m_list.Insert(&m_win);
+	
 	//Feld Sprite BMP laden
 	if (!Matrix.m_field[0][0].Load("94x84_Sprite_4.bmp", CSize(94, 85))) {
 		AfxMessageBox(L"Konnte 94x84_Sprite_4.bmp nicht laden!");
@@ -417,13 +424,20 @@ void CMFCBelegDlg::Game(bool playerchange) {
 //angecklicktes Feld wird sichtbar gemacht
 bool CMFCBelegDlg::SetField() {
 
-	if (Matrix.DrawFieldBuff()){				//wenn Feld setzen erfolgreich, wird der Spieler gewechselt und beide Puffer resetet
-		Game(TRUE);
-		Matrix.ResetBuff();
-		return TRUE;
+	if (Matrix.DrawFieldBuff(player_num)) {				//überprüft ob Feld setzen erfolgreich war
+		if (Matrix.CheckWin()) {						//wenn ja wird überprüft ob dies zum Sieg des Spelers führt
+			m_state = 5;
+			Win();
+			return FALSE;
+		}
+		else {											//wenn der Spieler nicht gewonnen hat, wird der Spieler gewechselt und beide Puffer resetet
+			Game(TRUE);
+			Matrix.ResetBuff();
+			return TRUE;
+		}
 	}
 	
-	Matrix.ResetBuff();
+	Matrix.ResetBuff();					
 	return FALSE;
 }
 
@@ -439,9 +453,11 @@ void CMFCBelegDlg::ResetGame() {
 	m_font.SetPosition(1921, 0);
 	player_num = 0;
 	Matrix.ResetState();
+	m_win.SetPosition(1921, 0);
 }
 
 
+//drehen des zu setzenden Feldes
 void CMFCBelegDlg::RotateField() {
 	CClientDC dc(this);
 
@@ -458,6 +474,19 @@ void CMFCBelegDlg::RotateField() {
 		Matrix.DrawPrevBuff();								
 	}
 	m_list.Update(&dc, 0, 0);
+}
+
+
+void CMFCBelegDlg::Win() {
+
+	CClientDC dc(this);
+
+	m_font.SetPosition(1921, 0);
+	m_win.SetSpriteNumber(0, player_num);
+	m_win.SetPosition(285, 400);
+
+	m_list.Update(&dc, 0, 0);
+	return;
 }
 
 

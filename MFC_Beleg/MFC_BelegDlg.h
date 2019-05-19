@@ -23,7 +23,7 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
 	CDIB m_buff;
-	CSprite m_startbkg, m_bkg, m_startbutton, m_menubutton[4], m_dicebutton, m_nextbutton, m_dice[2], m_font;
+	CSprite m_startbkg, m_bkg, m_startbutton, m_menubutton[4], m_dicebutton, m_nextbutton, m_dice[2], m_font, m_win;
 	CSpriteMatrix Matrix;
 	CSpriteList m_list;
 
@@ -38,6 +38,7 @@ public:
 	void ShowField(CPoint point);
 	bool Statemachine(int event);
 	void RotateField();
+	void Win();
 	
 
 
@@ -45,7 +46,7 @@ public:
 	struct tab {
 		int next_state;
 		int action;
-	} m_table[12][5];
+	} m_table[12][6];
 
 
 // Implementierung

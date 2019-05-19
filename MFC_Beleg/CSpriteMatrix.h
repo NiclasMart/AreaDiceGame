@@ -7,23 +7,22 @@ public:
 	
 	CSpriteMatrix();
 	~CSpriteMatrix();
-	CFieldSprite m_field[12][12]/*, transparent_field[12][12]*/;
+	CFieldSprite m_field[12][12];
 	CFieldSprite* pt_field;
 	CFieldSprite *preview_buff[6][6], *field_buff[6][6];
 	bool valid_field_pos;
 
 	void SetBuff(CFieldSprite *field, int w1, int w2, int player_num);
-	/*CSprite* SearchField(CSpriteList *list, int mouse_x, int mouse_y, int &feld_x, int &feld_y);
-	bool TestArea(int feld_x, int feld_y, int wuerfel_breite, int wuerfel_hoehe, int spieler);*/
 	void SetFieldState();
 	void DrawPrevBuff();
-	bool DrawFieldBuff();
+	bool DrawFieldBuff(int player);
 	void ResetBuff();
 	void ResetFieldBuff();
 	void ResetState();
+	bool CheckWin();
 
-	int helpfunc_1(int n, CFieldSprite* field);
-	int helpfunc_2(int x, int i);
+	int helpfunc_1(int m, CFieldSprite* field);
+	int helpfunc_2(int n, CFieldSprite* field);
 	
 	
 

@@ -42,6 +42,9 @@
     <ClInclude Include="CFieldSprite.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="CFieldControll.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Beleg.cpp">
@@ -63,6 +66,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="CFieldSprite.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="CFieldControll.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
