@@ -5,6 +5,7 @@
 #pragma once
 #include "spritelib.h";
 #include "CSpriteMatrix.h";
+#include "ControllMachine.h"
 
 
 
@@ -26,6 +27,7 @@ public:
 	CSprite m_startbkg, m_bkg, m_startbutton, m_menubutton[4], m_dicebutton, m_nextbutton, m_dice[2], m_font, m_win;
 	CSpriteMatrix Matrix;
 	CSpriteList m_list;
+	ControllMachine m_wintest;
 
 	int player_num;
 	int dice_value[2];
@@ -39,6 +41,7 @@ public:
 	bool Statemachine(int event);
 	void RotateField();
 	void Win();
+
 	
 
 

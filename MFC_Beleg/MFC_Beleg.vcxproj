@@ -180,8 +180,8 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CFieldControll.h" />
     <ClInclude Include="CFieldSprite.h" />
+    <ClInclude Include="ControllMachine.h" />
     <ClInclude Include="CSpriteMatrix.h" />
     <ClInclude Include="MFC_Beleg.h" />
     <ClInclude Include="MFC_BelegDlg.h" />
@@ -192,8 +192,8 @@
     <ClInclude Include="XUnzip.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CFieldControll.cpp" />
     <ClCompile Include="CFieldSprite.cpp" />
+    <ClCompile Include="ControllMachine.cpp" />
     <ClCompile Include="CSpriteMatrix.cpp" />
     <ClCompile Include="MFC_Beleg.cpp" />
     <ClCompile Include="MFC_BelegDlg.cpp" />

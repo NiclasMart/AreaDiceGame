@@ -20,6 +20,7 @@ public:
 	void ResetFieldBuff();
 	void ResetState();
 	bool CheckWin();
+	void ResetControlState();
 
 	int helpfunc_1(int m, CFieldSprite* field);
 	int helpfunc_2(int n, CFieldSprite* field);

@@ -42,7 +42,7 @@
     <ClInclude Include="CFieldSprite.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="CFieldControll.h">
+    <ClInclude Include="ControllMachine.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
@@ -68,7 +68,7 @@
     <ClCompile Include="CFieldSprite.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="CFieldControll.cpp">
+    <ClCompile Include="ControllMachine.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

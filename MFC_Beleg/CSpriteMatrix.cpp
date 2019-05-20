@@ -154,3 +154,12 @@ bool CSpriteMatrix::CheckWin() {
 	}
 	return FALSE;
 }
+
+
+void CSpriteMatrix::ResetControlState() {
+	for (int i = 0; i < 12; i++) {
+		for (int j = 0; j < 12; j++) {
+			m_field[i][j].SetControlState(FALSE);
+		}
+	}
+}

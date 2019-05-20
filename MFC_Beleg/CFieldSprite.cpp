@@ -3,7 +3,7 @@
 
 
 CFieldSprite::CFieldSprite()
-	:field_state(TRUE), field_playernum(-1)
+	:field_state(TRUE), field_playernum(-1), control_state(FALSE)
 {
 }
 
@@ -26,4 +26,13 @@ void CFieldSprite::SetPlayernum(int player) {
 
 int CFieldSprite::GetPlayernum() {
 	return field_playernum;
+}
+
+
+void CFieldSprite::SetControlState(bool state) {
+	control_state = state;
+}
+
+bool CFieldSprite::GetControlState() {
+	return control_state;
 }

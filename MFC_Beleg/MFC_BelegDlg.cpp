@@ -18,7 +18,7 @@
 
 
 CMFCBelegDlg::CMFCBelegDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_MFC_BELEG_DIALOG, pParent)
+	: CDialogEx(IDD_MFC_BELEG_DIALOG, pParent), m_wintest(&Matrix.m_field[0][0])
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
@@ -184,7 +184,6 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	m_list.Insert(&m_startbutton);
 
 	player_num = 0;
-	
 
 	return TRUE;  // TRUE zurückgeben, wenn der Fokus nicht auf ein Steuerelement gesetzt wird
 }
@@ -423,14 +422,16 @@ void CMFCBelegDlg::Game(bool playerchange) {
 
 //angecklicktes Feld wird sichtbar gemacht
 bool CMFCBelegDlg::SetField() {
-
-	if (Matrix.DrawFieldBuff(player_num)) {				//überprüft ob Feld setzen erfolgreich war
-		if (Matrix.CheckWin()) {						//wenn ja wird überprüft ob dies zum Sieg des Spelers führt
+	
+	if (Matrix.DrawFieldBuff(player_num)) {										//überprüft ob Feld setzen erfolgreich war
+		if ((m_wintest.WinControll(&Matrix.m_field[0][0]) == TRUE)) {			//wenn ja wird überprüft ob dies zum Sieg des Spelers führt
+			Matrix.ResetControlState();
 			m_state = 5;
 			Win();
 			return FALSE;
 		}
-		else {											//wenn der Spieler nicht gewonnen hat, wird der Spieler gewechselt und beide Puffer resetet
+		else {																	//wenn der Spieler nicht gewonnen hat, wird der Spieler gewechselt und beide Puffer resetet
+			Matrix.ResetControlState();
 			Game(TRUE);
 			Matrix.ResetBuff();
 			return TRUE;
@@ -454,6 +455,7 @@ void CMFCBelegDlg::ResetGame() {
 	player_num = 0;
 	Matrix.ResetState();
 	m_win.SetPosition(1921, 0);
+	Matrix.ResetControlState();
 }
 
 

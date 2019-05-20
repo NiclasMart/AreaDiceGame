@@ -10,9 +10,12 @@ public:
 	bool GetState();
 	void SetPlayernum(int player);
 	int GetPlayernum();
+	void SetControlState(bool state);
+	bool GetControlState();
 
 protected:
 	bool field_state;
 	int field_playernum;
+	bool control_state;
 };
 
