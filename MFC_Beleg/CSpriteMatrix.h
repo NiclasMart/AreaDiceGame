@@ -7,9 +7,11 @@ public:
 	
 	CSpriteMatrix();
 	~CSpriteMatrix();
+	
 	CFieldSprite m_field[12][12];
 	CFieldSprite* pt_field;
 	CFieldSprite *preview_buff[6][6], *field_buff[6][6];
+
 	bool valid_field_pos;
 
 	void SetBuff(CFieldSprite *field, int w1, int w2, int player_num);

@@ -390,8 +390,8 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 	}
 	else {
 		if (nIDEvent == 1) {
-			dice_value[0] = rand() % 6;
-			dice_value[1] = rand() % 6;
+			dice_value[0] = 5;//rand() % 6;
+			dice_value[1] = 5;// rand() % 6;
 			m_dice[0].SetSpriteNumber(0, dice_value[0]);
 			m_dice[1].SetSpriteNumber(0, dice_value[1]);
 			dice_value[0]++;
@@ -449,6 +449,7 @@ void CMFCBelegDlg::ResetGame() {
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
 			Matrix.m_field[i][j].SetAlpha(0.0f);
+			Matrix.m_field[i][j].SetPlayernum(-1);
 		}
 	}
 	m_font.SetPosition(1921, 0);

@@ -31,7 +31,7 @@ ControllMachine::~ControllMachine()
 bool ControllMachine::WinControll(CFieldSprite* field) {
 
 	ResetAll();
-	bool game_status = FALSE;													/*verhindert, dass in der ersten Runde bereits Sieg festgestellt wird, da nur eine Farbe auf dem Feld ist
+													/*verhindert, dass in der ersten Runde bereits Sieg festgestellt wird, da nur eine Farbe auf dem Feld ist
 																				es muss von jeder Farbe mindestens ein Spielstein auf dem Feld sein, damit Winermittlung greift*/
 	for(int i = 0; i < 144; i++) {
 
@@ -72,8 +72,8 @@ void ControllMachine::FieldControll(CFieldSprite* field) {
 
 	//Rekursiver Aufruf mit den 4 Adressen der angrenzendern 4 Felder
 	//if Anweisungen verhindern anspringen von Adressen auserhalb des Spielfeldes
-	if ((field != field_border[1]) && (field < (field + (12 - (field - field_border[0]) % 12)))) FieldControll(field + 1);
-	if ((field != field_border[0]) && (field > (field - (field - field_border[0]) % 12))) FieldControll(field + 1);
+	if ((field != field_border[0]) && (field > (field - ((field - field_border[0])) % 12))) FieldControll(field - 1);
+	if ((field != field_border[1]) && (field < (field + (12 - ((field - field_border[0])) % 12)))) FieldControll(field + 1);
 	if (field >= (field_border[0] + 12)) FieldControll(field - 12); 
 	if (field <= (field_border[1] - 12)) FieldControll(field + 12);
 		
@@ -84,7 +84,6 @@ void ControllMachine::AnalyzeBuff() {
 
 	if ((player[0] == TRUE) && (player[1] == TRUE)) return;					//wenn gefundener Bereich von beiden Spielern belegt werden könnte, kehre zurück
 	
-
 	if (player[0]) field_number[0] += buff_num;
 	else field_number[1] += buff_num;
 
@@ -98,7 +97,7 @@ void ControllMachine::ResetBuff() {
 
 
 void ControllMachine::ResetAll(){
-	
 	ResetBuff();
 	field_number[0] = field_number[1] = 0;
+	game_status = FALSE;
 }
