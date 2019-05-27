@@ -92,8 +92,8 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	m_list.Insert(&m_font);
 	
 	//Win Sprite laden
-	if (!m_win.Load("400x140_win_2.bmp", CSize(400, 140))) {
-		AfxMessageBox(L"Konnte 400x140_win_2.bmp nicht laden!");
+	if (!m_win.Load("140x400_win_3.bmp", CSize(400, 140))) {
+		AfxMessageBox(L"Konnte 140x400_win_3.bmp nicht laden!");
 		OnCancel();
 	}
 	m_win.SetZ(60);
@@ -184,6 +184,7 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	m_list.Insert(&m_startbutton);
 
 	player_num = 0;
+	round = 1;
 
 	return TRUE;  // TRUE zurückgeben, wenn der Fokus nicht auf ein Steuerelement gesetzt wird
 }
@@ -317,13 +318,15 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 		if (Matrix.pt_field != hit2) {											//wenn sich Maus auf ein neues Feld verschiebt, wird Neuzeichnen eingeleitet, ansonsten nicht
 			Matrix.ResetBuff();													//Setzt alle Inhalte der Puffer (Vorschaupuffer und Zeichenpuffer zurück				
 			Matrix.pt_field = hit2;												//speicher die Adresse des Feldes auf welches gezeigt wird
-			Matrix.SetBuff(hit2, dice_value[0], dice_value[1], player_num);		//Puffer werden neu geladen
+			Matrix.SetBuff(hit2, dice_value[0], dice_value[1], player_num, round);		//Puffer werden neu geladen
 			Matrix.DrawPrevBuff();												//zeichne die Vorschau Puffermatrix
 		}
 															
 	}
 
-		
+	CString test;
+	test.Format(L"Feld 0: %d    Feld 1: %d", m_wintest.player_points[0], m_wintest.player_points[1]);
+	SetWindowText(test);
 	
 	m_list.Update(&dc, 0, 0);
 
@@ -390,8 +393,8 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 	}
 	else {
 		if (nIDEvent == 1) {
-			dice_value[0] = 5;//rand() % 6;
-			dice_value[1] = 5;// rand() % 6;
+			dice_value[0] = rand() % 6;
+			dice_value[1] = rand() % 6;
 			m_dice[0].SetSpriteNumber(0, dice_value[0]);
 			m_dice[1].SetSpriteNumber(0, dice_value[1]);
 			dice_value[0]++;
@@ -412,9 +415,11 @@ void CMFCBelegDlg::Game(bool playerchange) {
 	if (playerchange == TRUE) {
 		if (player_num == 0) player_num = 1;
 		else player_num = 0;
+		round++;
 	}
 	m_font.SetPosition(100, 150);
 	m_font.SetSpriteNumber(0, player_num);
+	
 	
 	return;
 }
@@ -423,11 +428,12 @@ void CMFCBelegDlg::Game(bool playerchange) {
 //angecklicktes Feld wird sichtbar gemacht
 bool CMFCBelegDlg::SetField() {
 	
+	int winner;
 	if (Matrix.DrawFieldBuff(player_num)) {										//überprüft ob Feld setzen erfolgreich war
-		if ((m_wintest.WinControll(&Matrix.m_field[0][0]) == TRUE)) {			//wenn ja wird überprüft ob dies zum Sieg des Spelers führt
+		if ((m_wintest.WinControll(&Matrix.m_field[0][0], winner) == TRUE)) {			//wenn ja wird überprüft ob dies zum Sieg des Spelers führt
 			Matrix.ResetControlState();
 			m_state = 5;
-			Win();
+			Win(winner);
 			return FALSE;
 		}
 		else {																	//wenn der Spieler nicht gewonnen hat, wird der Spieler gewechselt und beide Puffer resetet
@@ -457,6 +463,7 @@ void CMFCBelegDlg::ResetGame() {
 	Matrix.ResetState();
 	m_win.SetPosition(1921, 0);
 	Matrix.ResetControlState();
+	round = 1;
 }
 
 
@@ -473,20 +480,20 @@ void CMFCBelegDlg::RotateField() {
 
 		Matrix.ResetBuff();
 		Matrix.pt_field = pt;														//zurückschreiben des Feldes auf den Feld Pointer
-		Matrix.SetBuff(Matrix.pt_field, dice_value[0], dice_value[1], player_num);	//Puffer werden neu initialisiert mit vertauschten Würfelzahlen (Rotation) 
+		Matrix.SetBuff(Matrix.pt_field, dice_value[0], dice_value[1], player_num, round);	//Puffer werden neu initialisiert mit vertauschten Würfelzahlen (Rotation) 
 		Matrix.DrawPrevBuff();								
 	}
 	m_list.Update(&dc, 0, 0);
 }
 
 
-void CMFCBelegDlg::Win() {
+void CMFCBelegDlg::Win(int &winner) {
 
 	CClientDC dc(this);
 
 	m_font.SetPosition(1921, 0);
-	m_win.SetSpriteNumber(0, player_num);
-	m_win.SetPosition(285, 400);
+	m_win.SetSpriteNumber(0, winner);
+	m_win.SetPosition(275, 400);
 
 	m_list.Update(&dc, 0, 0);
 	return;

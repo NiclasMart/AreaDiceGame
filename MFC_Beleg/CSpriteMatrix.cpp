@@ -8,7 +8,7 @@ CSpriteMatrix::CSpriteMatrix()
 {
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < 6; j++) {
-			preview_buff[i][j] = NULL;
+			
 			field_buff[i][j] = NULL;	
 		}
 	}
@@ -37,8 +37,8 @@ void CSpriteMatrix::SetFieldState() {
 void CSpriteMatrix::DrawPrevBuff() {
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < 6; j++) {
-			if (preview_buff[i][j] != NULL) {
-				preview_buff[i][j]->SetAlpha(0.5f);
+			if (field_buff[i][j] != NULL) {
+				field_buff[i][j]->SetAlpha(0.5f);
 			}
 
 		}
@@ -49,10 +49,10 @@ void CSpriteMatrix::DrawPrevBuff() {
 void CSpriteMatrix::ResetBuff() {
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < 6; j++) {
-			if (preview_buff[i][j] != NULL) {
-				if (preview_buff[i][j]->GetState() == TRUE)
-					preview_buff[i][j]->SetAlpha(0.0f);
-				preview_buff[i][j] = NULL;
+			if (field_buff[i][j] != NULL) {
+				if (field_buff[i][j]->GetState() == TRUE)
+					field_buff[i][j]->SetAlpha(0.0f);
+				field_buff[i][j] = NULL;
 			}
 
 		}
@@ -90,20 +90,33 @@ bool CSpriteMatrix::DrawFieldBuff(int player) {
 
 
 //Beide Puffer werden geladen
-void CSpriteMatrix::SetBuff(CFieldSprite *field, int w1, int w2, int player_num) {
+void CSpriteMatrix::SetBuff(CFieldSprite *field, int w1, int w2, int player_num, int round) {
 
 	valid_field_pos = TRUE;
 	for (int n = 0; n < w1; n++) {														//schreibe die Felder der Würfelzahl entsprechend in eine Puffermatrix
 		for (int m = 0; m < w2; m++) {													//Hilfsfunktionen berechnen Werte so, dass zu setzendes Feld nicht aus dem Spielfeld herausragt
 			int aux_var1 = helpfunc_1(m, field);
 			int aux_var2 = helpfunc_2(n, field);
-			if (((field + (12 * aux_var2)) - aux_var1)->GetState() == TRUE) {
-				((field + (12 * aux_var2)) - aux_var1)->SetSpriteNumber(0, player_num);
-				preview_buff[n][m] = field_buff[n][m] = ((field + (12 * aux_var2)) - aux_var1); 
+			CFieldSprite *pt_field = (field + (12 * aux_var2)) - aux_var1;
+
+			if (pt_field->GetState() == TRUE) {											//wenn das entsprechende Feld frei ist, wird es auf den richtigen Spieler eingerichtet und in den Puffer
+				pt_field->SetSpriteNumber(0, player_num);								//geschrieben
+				field_buff[n][m] = pt_field;
 			}
-			else valid_field_pos = FALSE;
-		}
+			else valid_field_pos = FALSE;												//wenn nur eines der Felder sich mit einem bereits gesetzten Feld überdeckt, wird die gesammte 
+		}																				//Possitionierung als ungültig markiert
 	}
+
+	
+	if (round < 3) {
+		valid_field_pos = FALSE;
+		if (round == 1) StartPhaseRule(field, player_num);
+		else 
+			StartPhaseRule(field_buff[w1-1][w2-1], player_num);
+		StartPhaseRule(field, player_num);
+	}
+	else RuleCheck(player_num);
+	
 }
 
 //setzt state für das gesammte spielfeld zurrück
@@ -133,27 +146,12 @@ int CSpriteMatrix::helpfunc_2(int n, CFieldSprite* field) {
 
 	int x = (field + (12 * n)) - &m_field[11][11];			//Position des Feldes in (negativ wenn in Matrix, Positiv wenn außerhalb der Matrix) 
 	if (x > 0) {											//falls Feld außerhalb liegen würde, wird n das letzte zulässige n zurück gegeben
-		valid_field_pos = FALSE;						//an diese Position darf das Feld dann nicht plaziert werden, da es aus der Matrix herausragt
+		valid_field_pos = FALSE;							//an diese Position darf das Feld dann nicht plaziert werden, da es aus der Matrix herausragt
 		return n - ((x /= 12) + 1);
 	}
 	else return n;
 }
 
-
-//Kontrolliert ob ein Spieler gewonnen hat -> hat ein Spieler mehr als die Hälfte aller Felder, hat er gewonnen
-bool CSpriteMatrix::CheckWin() {
-
-	int punkte[2] = { 0 };
-	for (int i = 0; i < 12; i++) {
-		for (int j = 0; j < 12; j++) {
-			if (m_field[i][j].GetState() == FALSE) {					//wenn dasentsprechende Feld belegt ist, wird die punkteanzahl des Spielers dem das Feld gehört um 1 erhöht
-				punkte[m_field[i][j].GetPlayernum()]++;
-			}
-			if ((punkte[0] > 72) || (punkte[1] > 72)) return TRUE;
-		}
-	}
-	return FALSE;
-}
 
 
 void CSpriteMatrix::ResetControlState() {
@@ -163,3 +161,44 @@ void CSpriteMatrix::ResetControlState() {
 		}
 	}
 }
+
+void CSpriteMatrix::RuleCheck(int &player_num){
+	bool connection = FALSE;
+
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 6; j++) {
+			if ((field_buff[i][j] != NULL) && (field_buff[i][j] >= &m_field[1][0])) {
+				CFieldSprite * pt1 = field_buff[i][j] - 12;
+
+				if ((pt1->GetState() == FALSE) && (pt1->GetPlayernum() == player_num)) connection = TRUE;
+			}
+			if ((field_buff[i][j] != NULL) && (field_buff[i][j] <= &m_field[10][11])) {
+				CFieldSprite * pt1 = field_buff[i][j] + 12;
+
+				if ((pt1->GetState() == FALSE) && (pt1->GetPlayernum() == player_num)) connection = TRUE;
+			}
+			if ((field_buff[i][j] != NULL) && (field_buff[i][j] > (field_buff[i][j] - ((field_buff[i][j] - &m_field[0][0]) % 12)))) {
+				CFieldSprite * pt1 = field_buff[i][j] - 1;
+
+				if ((pt1->GetState() == FALSE) && (pt1->GetPlayernum() == player_num)) connection = TRUE;
+			}
+			if ((field_buff[i][j] != NULL) && (field_buff[i][j] < (field_buff[i][j] + (11 - ((field_buff[i][j] - &m_field[11][11])) % 12)))) {
+				CFieldSprite * pt1 = field_buff[i][j] + 1;
+
+				if ((pt1->GetState() == FALSE) && (pt1->GetPlayernum() == player_num)) connection = TRUE;
+			}
+			
+
+		}
+	}
+
+	if (!connection) valid_field_pos = FALSE;
+}
+
+void CSpriteMatrix::StartPhaseRule(CFieldSprite* field, int player_num) {
+
+	if ((player_num == 0) && (field == &m_field[0][11])) valid_field_pos = TRUE;
+	if ((player_num == 1) && (field == &m_field[11][0])) valid_field_pos = TRUE;
+
+}
+

@@ -31,6 +31,7 @@ public:
 
 	int player_num;
 	int dice_value[2];
+	int round;
 
 	void InitDice();
 	void InitGame();
@@ -40,7 +41,7 @@ public:
 	void ShowField(CPoint point);
 	bool Statemachine(int event);
 	void RotateField();
-	void Win();
+	void Win(int &winner);
 
 	
 
