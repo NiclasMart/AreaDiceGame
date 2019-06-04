@@ -3,9 +3,10 @@
 //
 
 #pragma once
-#include "spritelib.h";
-#include "CSpriteMatrix.h";
+#include "spritelib.h"
+#include "CSpriteMatrix.h"
 #include "ControllMachine.h"
+#include "EnemyPlayer.h"
 
 
 
@@ -24,11 +25,14 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
 	CDIB m_buff;
-	CSprite m_startbkg, m_bkg, m_startbutton, m_menubutton[4], m_dicebutton, m_nextbutton, m_dice[2], m_font, m_win;
+	CSprite m_startbkg, m_bkg, m_startbutton, m_menubutton[4], m_dicebutton, m_nextbutton, m_dice[2], m_font, m_win, m_checkbox[2];
 	CSpriteMatrix Matrix;
 	CSpriteList m_list;
 	ControllMachine m_wintest;
+	EnemyPlayer m_enemy;
 
+
+	bool computer_enemy;
 	int player_num;
 	int dice_value[2];
 	int round;
@@ -42,6 +46,8 @@ public:
 	bool Statemachine(int event);
 	void RotateField();
 	void Win(int &winner);
+	void InitEnemy();
+	void EnemyTurn();
 
 	
 
@@ -50,7 +56,7 @@ public:
 	struct tab {
 		int next_state;
 		int action;
-	} m_table[12][6];
+	} m_table[13][6];
 
 
 // Implementierung

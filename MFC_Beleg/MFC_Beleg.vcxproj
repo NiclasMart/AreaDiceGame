@@ -184,6 +184,7 @@
     <ClInclude Include="CFieldSprite.h" />
     <ClInclude Include="ControllMachine.h" />
     <ClInclude Include="CSpriteMatrix.h" />
+    <ClInclude Include="EnemyPlayer.h" />
     <ClInclude Include="MFC_Beleg.h" />
     <ClInclude Include="MFC_BelegDlg.h" />
     <ClInclude Include="Resource.h" />
@@ -196,6 +197,7 @@
     <ClCompile Include="CFieldSprite.cpp" />
     <ClCompile Include="ControllMachine.cpp" />
     <ClCompile Include="CSpriteMatrix.cpp" />
+    <ClCompile Include="EnemyPlayer.cpp" />
     <ClCompile Include="MFC_Beleg.cpp" />
     <ClCompile Include="MFC_BelegDlg.cpp" />
     <ClCompile Include="spritelib.cpp" />

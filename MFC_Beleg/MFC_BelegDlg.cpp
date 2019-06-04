@@ -54,12 +54,14 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Großes Symbol verwenden
 	SetIcon(m_hIcon, FALSE);		// Kleines Symbol verwenden
 
+
+
 	// TODO: Hier zusätzliche Initialisierung einfügen
 	srand((unsigned)time(NULL));
 
 	//Anfangszustand setzen (Zustand: Spielstart) und  Zustandsmatrix initialisieren
 	m_state = 0;
-	struct tab  table[12][6] = {
+	struct tab  table[13][6] = {
 		{ { 1, 1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 } },
 		{ { -1, -1 }, { 1, 2 }, { 2, 2 }, { 2, 2 }, { 4, 2 }, { 5, 2 } },
 		{ { -1, -1 }, { -1, -1 }, { 1, 6 }, { 1, 6 }, { 1, 6 }, { 1, 6 } },
@@ -71,7 +73,8 @@ BOOL CMFCBelegDlg::OnInitDialog()
 		{ { -1, -1 }, { 1, 10 }, { 2, 10 }, { 3, 10 }, { 4, 10 }, { 5, 10 } },
 		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 11 }, { -1, -1 }, { -1, -1 } },
 		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 3, 7 }, { -1, -1 }, { -1, -1 } },
-		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 2, 12 }, { -1, -1 }, { -1, -1 } }
+		{ { -1, -1 }, { -1, -1 }, { -1, -1 }, { 2, 12 }, { -1, -1 }, { -1, -1 } },
+		{ { -1, -1 }, { 1, 13 }, { -1, -1 }, { -1, -1 }, { -1, -1 }, { -1, -1 } }
 	};
 	memcpy(m_table, table, sizeof(table));
 	
@@ -177,6 +180,16 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	m_nextbutton.SetPosition(1300, 1);
 	m_nextbutton.SetSpriteNumber(0, 10);
 
+	//Checkbox initialisieren
+	if (!m_checkbox[0].Load("49x344_Checkbox_3.bmp", CSize(344, 49))) {
+		AfxMessageBox(L"Konnte 49x344_Checkbox_3.bmp nicht laden!");
+		OnCancel();
+	}
+	m_checkbox[0].SetZ(30);
+	m_checkbox[1] = m_checkbox[0];
+	m_checkbox[1].SetSpriteNumber(0, 1);
+	m_checkbox[0].SetPosition(100, 125);
+	m_checkbox[1].SetPosition(385, 125);
 
 	//alle Elemente des Startbildschirms zur Liste hinzufügen
 	m_list.SetWorkspace(&m_buff);
@@ -185,6 +198,7 @@ BOOL CMFCBelegDlg::OnInitDialog()
 
 	player_num = 0;
 	round = 1;
+	computer_enemy = FALSE;
 
 	return TRUE;  // TRUE zurückgeben, wenn der Fokus nicht auf ein Steuerelement gesetzt wird
 }
@@ -265,6 +279,10 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	//Next Button
 	if (hit == &m_nextbutton) {
 		Statemachine(11);
+	}
+	//Computergegner Button
+	if (hit == &m_checkbox[1]) {
+		Statemachine(12);
 	}
 
 	CFieldSprite *hit2 = dynamic_cast<CFieldSprite*>(hit);						//dynamic Cast -> wenn Cast erfolgreich muss es sich um ein Matrix Feld handeln
@@ -358,6 +376,8 @@ void CMFCBelegDlg::InitGame(){
 	m_list.Insert(&m_dice[0]);
 	m_list.Insert(&m_dice[1]);
 	m_list.Insert(&m_nextbutton);
+	m_list.Insert(&m_checkbox[0]);
+	m_list.Insert(&m_checkbox[1]);
 	for (int i = 0; i < 4; i++) {
 		m_list.Insert(&m_menubutton[i]);
 	}
@@ -386,13 +406,14 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 	// TODO: Fügen Sie hier Ihren Meldungsbehandlungscode ein, und/oder benutzen Sie den Standard.
 	CClientDC dc(this);
 
-	if (nIDEvent == 2) {
-		KillTimer(1);
-		KillTimer(2);
-		Statemachine(5);
-	}
-	else {
-		if (nIDEvent == 1) {
+
+	switch (nIDEvent) {
+		case 2: 
+			KillTimer(1);
+			KillTimer(2);
+			Statemachine(5);
+		break;
+		case 1: 
 			dice_value[0] = rand() % 6;
 			dice_value[1] = rand() % 6;
 			m_dice[0].SetSpriteNumber(0, dice_value[0]);
@@ -400,11 +421,12 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 			dice_value[0]++;
 			dice_value[1]++;
 			m_list.Update(&dc, 0, 0);
-
-		}
+		break;
+		case 3: 
+			m_enemy.EnemyTurn(&Matrix.m_field[0][0], Matrix, round, player_num, dice_value[0], dice_value[1]);
+			KillTimer(3);
 	}
 	
-
 	CDialogEx::OnTimer(nIDEvent);
 }
 
@@ -416,8 +438,13 @@ void CMFCBelegDlg::Game(bool playerchange) {
 		if (player_num == 0) player_num = 1;
 		else player_num = 0;
 		round++;
+
+		if ((player_num == 1) && (computer_enemy)) {
+			EnemyTurn();
+			
+		}
 	}
-	m_font.SetPosition(100, 150);
+	m_font.SetPosition(100, 200);
 	m_font.SetSpriteNumber(0, player_num);
 	
 	
@@ -429,23 +456,27 @@ void CMFCBelegDlg::Game(bool playerchange) {
 bool CMFCBelegDlg::SetField() {
 	
 	int winner;
-	if (Matrix.DrawFieldBuff(player_num)) {										//überprüft ob Feld setzen erfolgreich war
-		if ((m_wintest.WinControll(&Matrix.m_field[0][0], winner) == TRUE)) {			//wenn ja wird überprüft ob dies zum Sieg des Spelers führt
-			Matrix.ResetControlState();
-			m_state = 5;
-			Win(winner);
+	
+	if ((!computer_enemy) || (player_num == 0)) {
+		if (!Matrix.DrawFieldBuff(player_num)) {
+			Matrix.ResetBuff();
 			return FALSE;
 		}
-		else {																	//wenn der Spieler nicht gewonnen hat, wird der Spieler gewechselt und beide Puffer resetet
-			Matrix.ResetControlState();
-			Game(TRUE);
-			Matrix.ResetBuff();
-			return TRUE;
-		}
+	}
+
+	if ((m_wintest.WinControll(&Matrix.m_field[0][0], winner) == TRUE)) {			//wenn ja wird überprüft ob dies zum Sieg des Spelers führt
+		Matrix.ResetControlState();
+		m_state = 5;
+		Win(winner);
+		return FALSE;
+	}
+	else {																			//wenn der Spieler nicht gewonnen hat, wird der Spieler gewechselt und beide Puffer resetet
+		Matrix.ResetControlState();
+		Game(TRUE);
+		Matrix.ResetBuff();
+		return TRUE;
 	}
 	
-	Matrix.ResetBuff();					
-	return FALSE;
 }
 
 
@@ -499,6 +530,27 @@ void CMFCBelegDlg::Win(int &winner) {
 	return;
 }
 
+void CMFCBelegDlg::InitEnemy() {
+
+	if (computer_enemy) {
+		m_checkbox[1].SetSpriteNumber(0, 1);
+		computer_enemy = FALSE;
+	}
+	else {
+		m_checkbox[1].SetSpriteNumber(0, 2);
+		computer_enemy = TRUE;
+	}
+}
+
+void CMFCBelegDlg::EnemyTurn() {
+
+	CClientDC dc(this);
+
+	InitDice();
+	SetTimer(3, 3000, NULL);
+	m_list.Update(&dc, 0, 0);
+}
+
 
 //bestimmt anhand des Momentanen Zustands und des eingetroffenen Ereignisses die folgende Aktion
 bool CMFCBelegDlg::Statemachine(int event) {
@@ -533,6 +585,7 @@ bool CMFCBelegDlg::Statemachine(int event) {
 	case 12: Matrix.ResetBuff();
 			 Game(TRUE);
 		break;
+	case 13: InitEnemy();
 	}
 	m_state = m_table[event][m_state].next_state;
 }

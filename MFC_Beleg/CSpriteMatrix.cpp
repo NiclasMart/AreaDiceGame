@@ -61,6 +61,7 @@ void CSpriteMatrix::ResetBuff() {
 	pt_field = NULL;
 }
 
+//Setzt den Feld Puffer zurück
 void CSpriteMatrix::ResetFieldBuff() {
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < 6; j++) {
@@ -89,7 +90,7 @@ bool CSpriteMatrix::DrawFieldBuff(int player) {
 }
 
 
-//Beide Puffer werden geladen
+//Puffer wird geladen
 void CSpriteMatrix::SetBuff(CFieldSprite *field, int w1, int w2, int player_num, int round) {
 
 	valid_field_pos = TRUE;
@@ -109,11 +110,10 @@ void CSpriteMatrix::SetBuff(CFieldSprite *field, int w1, int w2, int player_num,
 
 	
 	if (round < 3) {
-		valid_field_pos = FALSE;
 		if (round == 1) StartPhaseRule(field, player_num);
 		else 
 			StartPhaseRule(field_buff[w1-1][w2-1], player_num);
-		StartPhaseRule(field, player_num);
+		/*StartPhaseRule(field, player_num);*/
 	}
 	else RuleCheck(player_num);
 	
@@ -153,7 +153,7 @@ int CSpriteMatrix::helpfunc_2(int n, CFieldSprite* field) {
 }
 
 
-
+//Controll State von allen Feldern wird zurück gesetzt
 void CSpriteMatrix::ResetControlState() {
 	for (int i = 0; i < 12; i++) {
 		for (int j = 0; j < 12; j++) {
@@ -162,6 +162,8 @@ void CSpriteMatrix::ResetControlState() {
 	}
 }
 
+
+//Überprüft Regeln entsprechend ob an gewünschter Position überhaupt ein Feld gesetzt werden darf
 void CSpriteMatrix::RuleCheck(int &player_num){
 	bool connection = FALSE;
 
@@ -195,10 +197,13 @@ void CSpriteMatrix::RuleCheck(int &player_num){
 	if (!connection) valid_field_pos = FALSE;
 }
 
+
+//Gesonderte reglung der ersten beiden Runden, da noch kein Feld zum ansetzen existiert
 void CSpriteMatrix::StartPhaseRule(CFieldSprite* field, int player_num) {
 
-	if ((player_num == 0) && (field == &m_field[0][11])) valid_field_pos = TRUE;
-	if ((player_num == 1) && (field == &m_field[11][0])) valid_field_pos = TRUE;
+	if ((player_num == 0) && (!(field == &m_field[0][11]))) valid_field_pos = FALSE;
+	if ((player_num == 1) && (!(field == &m_field[11][0]))) 
+		valid_field_pos = FALSE;
 
 }
 

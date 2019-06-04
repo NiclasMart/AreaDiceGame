@@ -45,6 +45,9 @@
     <ClInclude Include="ControllMachine.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="EnemyPlayer.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFC_Beleg.cpp">
@@ -69,6 +72,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="ControllMachine.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyPlayer.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
