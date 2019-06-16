@@ -25,7 +25,7 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV-Unterstützung
 	CDIB m_buff;
-	CSprite m_startbkg, m_bkg, m_startbutton, m_menubutton[4], m_dicebutton, m_nextbutton, m_dice[2], m_font, m_win, m_checkbox[2];
+	CSprite m_startbkg, m_bkg, m_info, m_infobutton, m_startbutton, m_menubutton[4], m_dicebutton, m_nextbutton, m_dice[2], m_font, m_win, m_checkbox[2];
 	CSpriteMatrix Matrix;
 	CSpriteList m_list;
 	ControllMachine m_wintest;
@@ -47,7 +47,10 @@ public:
 	void RotateField();
 	void Win(int &winner);
 	void InitEnemy();
+	void InitEnemyTurn();
 	void EnemyTurn();
+
+	
 
 	
 

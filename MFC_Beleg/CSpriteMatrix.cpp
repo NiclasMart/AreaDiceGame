@@ -57,7 +57,7 @@ void CSpriteMatrix::ResetBuff() {
 
 		}
 	}
-	ResetFieldBuff();
+	/*ResetFieldBuff();*/
 	pt_field = NULL;
 }
 
@@ -108,14 +108,12 @@ void CSpriteMatrix::SetBuff(CFieldSprite *field, int w1, int w2, int player_num,
 		}																				//Possitionierung als ungültig markiert
 	}
 
-	
-	if (round < 3) {
-		if (round == 1) StartPhaseRule(field, player_num);
-		else 
-			StartPhaseRule(field_buff[w1-1][w2-1], player_num);
+	if ((player_num == 0) && (m_field[0][11].GetState() == TRUE))  StartPhaseRule(field, player_num);
+	else {
+		if ((player_num == 1) && (m_field[11][0].GetState() == TRUE)) StartPhaseRule(field_buff[w1 - 1][w2 - 1], player_num);
 		/*StartPhaseRule(field, player_num);*/
+		else RuleCheck(player_num);
 	}
-	else RuleCheck(player_num);
 	
 }
 
@@ -184,7 +182,7 @@ void CSpriteMatrix::RuleCheck(int &player_num){
 
 				if ((pt1->GetState() == FALSE) && (pt1->GetPlayernum() == player_num)) connection = TRUE;
 			}
-			if ((field_buff[i][j] != NULL) && (field_buff[i][j] < (field_buff[i][j] + (11 - ((field_buff[i][j] - &m_field[11][11])) % 12)))) {
+			if ((field_buff[i][j] != NULL) && (field_buff[i][j] < (field_buff[i][j] + (11 - ((field_buff[i][j] - &m_field[0][0])) % 12)))) {
 				CFieldSprite * pt1 = field_buff[i][j] + 1;
 
 				if ((pt1->GetState() == FALSE) && (pt1->GetPlayernum() == player_num)) connection = TRUE;
@@ -206,4 +204,6 @@ void CSpriteMatrix::StartPhaseRule(CFieldSprite* field, int player_num) {
 		valid_field_pos = FALSE;
 
 }
+
+
 

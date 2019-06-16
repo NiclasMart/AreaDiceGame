@@ -191,6 +191,19 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	m_checkbox[0].SetPosition(100, 125);
 	m_checkbox[1].SetPosition(385, 125);
 
+
+	//Info + info-zurück Button initialisieren
+	if (!m_info.Load("Info.bmp")) {
+		AfxMessageBox(L"Konnte Info.bmp nicht laden!");
+		OnCancel();
+	}
+	m_info.SetZ(100);
+	m_info.SetPosition(1921, 0);
+
+	m_infobutton = m_menubutton[3];
+	m_infobutton.SetZ(101);
+	m_infobutton.SetPosition(1921, 0);
+
 	//alle Elemente des Startbildschirms zur Liste hinzufügen
 	m_list.SetWorkspace(&m_buff);
 	m_list.Insert(&m_startbkg);
@@ -285,6 +298,20 @@ void CMFCBelegDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		Statemachine(12);
 	}
 
+	//Info Button
+	if (hit == &m_menubutton[2]) {
+		
+
+		m_info.SetPosition(0, 0);
+		m_infobutton.SetPosition(1700, 950);
+	}
+
+	//Info-zurück Button
+	if (hit == &m_infobutton) {
+		m_info.SetPosition(1921, 0);
+		m_infobutton.SetPosition(1921, 0);
+	}
+
 	CFieldSprite *hit2 = dynamic_cast<CFieldSprite*>(hit);						//dynamic Cast -> wenn Cast erfolgreich muss es sich um ein Matrix Feld handeln
 	if ((hit2 != NULL)) {
 		if (Statemachine(6)) m_state = 2;										//falls das Setzen des Feldes erfolgreich war, wird der Spieler gewechselt
@@ -329,6 +356,13 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 			m_menubutton[i].SetSpriteNumber(0, i * 2);
 	}
 
+	//info-zurück Button
+	if (hit == &m_infobutton)
+		m_infobutton.SetSpriteNumber(0, 7);
+	else
+		m_infobutton.SetSpriteNumber(0, 6);
+
+
 	//Spielfelder
 	if (hit == &m_bkg) Matrix.ResetBuff();										//falls Spielfeld verlassen, setzte alles zurück
 	CFieldSprite *hit2 = dynamic_cast<CFieldSprite*>(hit);						//dynamic Cast -> wenn Cast erfolgreich muss es sich um ein Matrix Feld handeln
@@ -343,7 +377,7 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 	}
 
 	CString test;
-	test.Format(L"Feld 0: %d    Feld 1: %d", m_wintest.player_points[0], m_wintest.player_points[1]);
+	test.Format(L"Feld 0: %d    Feld 1: %d  Status: %d", m_wintest.player_points[0], m_wintest.player_points[1], Matrix.valid_field_pos == TRUE ? 1 : 0);
 	SetWindowText(test);
 	
 	m_list.Update(&dc, 0, 0);
@@ -378,6 +412,8 @@ void CMFCBelegDlg::InitGame(){
 	m_list.Insert(&m_nextbutton);
 	m_list.Insert(&m_checkbox[0]);
 	m_list.Insert(&m_checkbox[1]);
+	m_list.Insert(&m_info);
+	m_list.Insert(&m_infobutton);
 	for (int i = 0; i < 4; i++) {
 		m_list.Insert(&m_menubutton[i]);
 	}
@@ -423,8 +459,7 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 			m_list.Update(&dc, 0, 0);
 		break;
 		case 3: 
-			m_enemy.EnemyTurn(&Matrix.m_field[0][0], Matrix, round, player_num, dice_value[0], dice_value[1]);
-			KillTimer(3);
+			EnemyTurn();
 	}
 	
 	CDialogEx::OnTimer(nIDEvent);
@@ -434,13 +469,13 @@ void CMFCBelegDlg::OnTimer(UINT_PTR nIDEvent)
 //ändert die Spielernummer falls erster Aufruf playerchange = FALSE, sonst TRUE
 void CMFCBelegDlg::Game(bool playerchange) {
 	
-	if (playerchange == TRUE) {
+	if (playerchange) {
 		if (player_num == 0) player_num = 1;
 		else player_num = 0;
 		round++;
 
 		if ((player_num == 1) && (computer_enemy)) {
-			EnemyTurn();
+			InitEnemyTurn();
 			
 		}
 	}
@@ -457,15 +492,16 @@ bool CMFCBelegDlg::SetField() {
 	
 	int winner;
 	
-	if ((!computer_enemy) || (player_num == 0)) {
+
+	if ((!computer_enemy) || (player_num == 0)) {									//wenn entweder der Computergegner nicht angeschaltet ist, oder der andere Spieler am Zug ist
 		if (!Matrix.DrawFieldBuff(player_num)) {
 			Matrix.ResetBuff();
 			return FALSE;
 		}
 	}
 
-	if ((m_wintest.WinControll(&Matrix.m_field[0][0], winner) == TRUE)) {			//wenn ja wird überprüft ob dies zum Sieg des Spelers führt
-		Matrix.ResetControlState();
+	if ((m_wintest.WinControll(&Matrix.m_field[0][0], winner) == TRUE)) {			//Siegkontrolle
+		Matrix.ResetControlState();													//wenn ein Spieler gewonnen hat wird FALSE zurück gegeben und die Funktion Win() gerufen
 		m_state = 5;
 		Win(winner);
 		return FALSE;
@@ -542,7 +578,7 @@ void CMFCBelegDlg::InitEnemy() {
 	}
 }
 
-void CMFCBelegDlg::EnemyTurn() {
+void CMFCBelegDlg::InitEnemyTurn() {
 
 	CClientDC dc(this);
 
@@ -550,6 +586,26 @@ void CMFCBelegDlg::EnemyTurn() {
 	SetTimer(3, 3000, NULL);
 	m_list.Update(&dc, 0, 0);
 }
+
+void CMFCBelegDlg::EnemyTurn() {
+
+	CClientDC dc(this);
+	int winner;
+
+	KillTimer(3);
+	m_enemy.EnemyTurn(&Matrix.m_field[0][0], Matrix, round, player_num, dice_value[0], dice_value[1], &dc, m_list);
+
+	if (m_wintest.WinControll(&Matrix.m_field[0][0], winner)) {						//Siegkontrolle
+		Matrix.ResetControlState();													//wenn ein Spieler gewonnen hat wird FALSE zurück gegeben und die Funktion Win() gerufen
+		m_state = 5;
+		Win(winner);
+		return;
+	}
+
+	Game(TRUE);
+	m_list.Update(&dc, 0, 0);
+}
+
 
 
 //bestimmt anhand des Momentanen Zustands und des eingetroffenen Ereignisses die folgende Aktion
@@ -582,8 +638,11 @@ bool CMFCBelegDlg::Statemachine(int event) {
 		break;
 	case 11: return TRUE;
 		break;
-	case 12: Matrix.ResetBuff();
-			 Game(TRUE);
+	case 12:
+		if ((!computer_enemy) || (player_num == 0)) {
+			Matrix.ResetBuff();
+			Game(TRUE);
+	}
 		break;
 	case 13: InitEnemy();
 	}

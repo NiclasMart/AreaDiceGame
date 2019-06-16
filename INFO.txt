@@ -1,0 +1,24 @@
+Willkommen zum Area Dice Game.
+
+Es handelt sich um ein einfaches kompetitives Spiel, bei dem es einfach gesagt darum geht, mehr Felder als sein Gegner einzunehmen.
+Die Regeln sind schnell und einfach erklärt.
+
+- es wird abwechselnd gewürfelt
+- nach dem Würfeln platziert man seine gewürfelte Feldgröße im Spielfeld
+- in der ersten Runde fängt jeder Spieler in der mit seiner Farbe markierten Ecke an
+- in den weiteren Runden, muss das Feld immer an ein eigenes, zuvor gesetztes Feld angrenzen
+- sollte es nicht möglich sein ein Feld zu setzen, verfällt der Zug und die Runde kann mit dem NEXT Button übersprungen werden
+- Sieger ist, wer zuerst 72 Felder besitzt oder mit so viel Verstand bzw. Glück spielt, dass die eigene Feldanzahl nicht mehr vom Gegner überboten werden kann.
+
+Du kannst auch gegen einen Computergegner spielen ... dieser muss über die Checkbox vor jeder Runde (vor dem Betätigen des START Buttons) aktiviert bzw. deaktiviert werden
+
+Ich wünsche viel Spaß und Erfolg beim Spielen :D
+
+*weitere Hinweise:
+- mit der R Taste lässt sich das zu platzierende Feld rotieren
+- vor jedem Spielbeginn muss der START Button betätigt werden (auch nach dem Betätigen des RESET Buttons)
+- der RESET Button setzt das Spiel zurück
+- den INFO Button hast du ja anscheinend gefunden und verstehst hoffentlich, was er tut ;)
+- der ENDE Button beendet das Spiel (überlege dir immer genau, ob du dieses Spiel wirklich verlassen möchtest)
+- WÜRFELN ... erklärt sich hoffentlich von selbst
+- mit dem NEXT Button kannst du deinen aktuellen Zug überspringen
