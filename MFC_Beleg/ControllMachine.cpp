@@ -49,7 +49,7 @@ bool ControllMachine::WinControll(CFieldSprite* field, int &winner) {
 		field += 1;
 	}
 
-	if (!game_status[0] || !game_status[1]) return FALSE;
+	if ((!game_status[0]) || (!game_status[1])) return FALSE;
 	if ((player_points[0] > 72) || (player_points[1] > 72) || ((player_points[0] == 72) && (player_points[1] == 72))) {
 		if (player_points[0] > 72) winner = 0;
 		else if (player_points[1] > 72) winner = 1;

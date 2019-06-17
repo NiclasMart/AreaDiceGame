@@ -491,7 +491,7 @@ void CMFCBelegDlg::Game(bool playerchange) {
 bool CMFCBelegDlg::SetField() {
 	
 	int winner;
-	
+	Matrix.ResetControlState();
 
 	if ((!computer_enemy) || (player_num == 0)) {									//wenn entweder der Computergegner nicht angeschaltet ist, oder der andere Spieler am Zug ist
 		if (!Matrix.DrawFieldBuff(player_num)) {
@@ -500,14 +500,12 @@ bool CMFCBelegDlg::SetField() {
 		}
 	}
 
-	if ((m_wintest.WinControll(&Matrix.m_field[0][0], winner) == TRUE)) {			//Siegkontrolle
-		Matrix.ResetControlState();													//wenn ein Spieler gewonnen hat wird FALSE zurück gegeben und die Funktion Win() gerufen
-		m_state = 5;
+	if ((m_wintest.WinControll(&Matrix.m_field[0][0], winner) == TRUE)) {			//Siegkontrolle							
+		m_state = 5;																//wenn ein Spieler gewonnen hat wird FALSE zurück gegeben und die Funktion Win() gerufen
 		Win(winner);
 		return FALSE;
 	}
 	else {																			//wenn der Spieler nicht gewonnen hat, wird der Spieler gewechselt und beide Puffer resetet
-		Matrix.ResetControlState();
 		Game(TRUE);
 		Matrix.ResetBuff();
 		return TRUE;
@@ -595,9 +593,9 @@ void CMFCBelegDlg::EnemyTurn() {
 	KillTimer(3);
 	m_enemy.EnemyTurn(&Matrix.m_field[0][0], Matrix, round, player_num, dice_value[0], dice_value[1], &dc, m_list);
 
-	if (m_wintest.WinControll(&Matrix.m_field[0][0], winner)) {						//Siegkontrolle
-		Matrix.ResetControlState();													//wenn ein Spieler gewonnen hat wird FALSE zurück gegeben und die Funktion Win() gerufen
-		m_state = 5;
+	Matrix.ResetControlState();
+	if (m_wintest.WinControll(&Matrix.m_field[0][0], winner)) {						//Siegkontrolle												
+		m_state = 5;																//wenn ein Spieler gewonnen hat wird FALSE zurück gegeben und die Funktion Win() gerufen
 		Win(winner);
 		return;
 	}
