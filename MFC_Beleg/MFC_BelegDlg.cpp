@@ -54,7 +54,9 @@ BOOL CMFCBelegDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Großes Symbol verwenden
 	SetIcon(m_hIcon, FALSE);		// Kleines Symbol verwenden
 
-
+	CString text;
+	text.Format(L"Area-Dice-Game");
+	SetWindowText(text);
 
 	// TODO: Hier zusätzliche Initialisierung einfügen
 	srand((unsigned)time(NULL));
@@ -376,9 +378,9 @@ void CMFCBelegDlg::OnMouseMove(UINT nFlags, CPoint point)
 															
 	}
 
-	CString test;
-	test.Format(L"Feld 0: %d    Feld 1: %d  Status: %d", m_wintest.player_points[0], m_wintest.player_points[1], Matrix.valid_field_pos == TRUE ? 1 : 0);
-	SetWindowText(test);
+	//CString test;
+	//test.Format(L"Feld 0: %d    Feld 1: %d  Status: %d", m_wintest.player_points[0], m_wintest.player_points[1], Matrix.valid_field_pos == TRUE ? 1 : 0);
+	//SetWindowText(test);
 	
 	m_list.Update(&dc, 0, 0);
 
